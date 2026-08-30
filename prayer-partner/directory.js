@@ -15,12 +15,92 @@ const emptyState = document.querySelector("#emptyState");
 const errorState = document.querySelector("#errorState");
 const personDialog = document.querySelector("#personDialog");
 
+const storageKeys = window.AMICUS_STORAGE;
+const PRAYER_LOG_KEY = "amicus-prayer-log-v1";
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 let currentRole = "student";
 let loadingTimer;
+let openPersonId = null;
 
 function initials(name) {
-  const primaryName = name.split(" (")[0].trim();
-  return [...primaryName].slice(-2).join("");
+  return [...koreanName(name)].slice(-2).join("");
+}
+
+// data.js records unknown values as prose ("학교 정보 없음", "학년 정보 확인 필요").
+// Those are notes to the editor, not something to show a reader.
+function realValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/정보\s*(없음|확인\s*필요)/.test(text)) return "";
+  if (text === "없음") return "";
+  return text;
+}
+
+function koreanName(name) {
+  return String(name || "").split(" (")[0].trim();
+}
+
+function latinName(name) {
+  const match = /\(([^)]+)\)/.exec(String(name || ""));
+  return match ? match[1].trim() : "";
+}
+
+function personMeta(person) {
+  return [realValue(person.school), realValue(person.grade)].filter(Boolean).join(" · ");
+}
+
+function readApplications() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKeys.applications) || "[]");
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+// How many partners have actually been matched to each student, from the same
+// store partner.html writes to.
+function partnerCounts() {
+  return readApplications().reduce((counts, application) => {
+    if (!application.studentId) return counts;
+    counts[application.studentId] = (counts[application.studentId] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function readPrayerLog() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PRAYER_LOG_KEY) || "{}");
+    return stored && typeof stored === "object" ? stored : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePrayerLog(log) {
+  try {
+    localStorage.setItem(PRAYER_LOG_KEY, JSON.stringify(log));
+  } catch {
+    // A full or blocked store only costs the record, not the page.
+  }
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Four buckets, oldest first; index 3 is the current week.
+function weeklyCounts(dates) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const buckets = [0, 0, 0, 0];
+  dates.forEach((date) => {
+    const age = startOfToday.getTime() - new Date(`${date}T00:00:00`).getTime();
+    const weeksAgo = Math.floor(age / WEEK_MS);
+    if (weeksAgo >= 0 && weeksAgo < 4) buckets[3 - weeksAgo] += 1;
+  });
+  return buckets;
 }
 
 function normalize(value) {
@@ -39,25 +119,44 @@ function avatarMarkup(person, className) {
   return `<span class="${className}" aria-hidden="true">${initials(person.name)}</span>`;
 }
 
-function cardMarkup(person, index) {
-  const roleLabel = currentRole === "student" ? "학생" : "간사";
+function badgeFor(person, counts) {
+  if (currentRole === "staff") {
+    return { text: `기도 파트너 ${counts[person.id] || 0}명`, waiting: false };
+  }
+  const count = counts[person.id] || 0;
+  return count === 0
+    ? { text: "아직 파트너가 없어요", waiting: true }
+    : { text: `파트너 ${count}명`, waiting: false };
+}
+
+function cardMarkup(person, index, counts) {
   const cardClass = currentRole === "student" ? "person-card prayer-hand-card" : "person-card staff-person-card";
+  const latin = latinName(person.name);
+  const meta = personMeta(person) || department.name;
+  const prayer = realValue(person.prayer);
+  const badge = badgeFor(person, counts);
   return `
-    <button class="${cardClass}" type="button" data-person-index="${index}">
-      <span class="person-top">
-        ${avatarMarkup(person, "avatar")}
-        <span class="person-role">${roleLabel}</span>
+    <button class="${cardClass}${badge.waiting ? " is-waiting" : ""}" type="button" data-person-index="${index}">
+      <span class="person-identity">
+        <h3>${escapeHtml(koreanName(person.name))}</h3>
+        ${latin ? `<span class="person-latin">${escapeHtml(latin)}</span>` : ""}
       </span>
-      <span>
-        <h3>${person.name}</h3>
-        <p class="person-meta">${person.school} / ${person.grade}</p>
-      </span>
+      <span class="person-meta">${escapeHtml(meta)}</span>
       <span class="prayer-preview">
         <span>기도제목</span>
-        <p>${person.prayer}</p>
+        <p${prayer ? "" : ' class="is-empty"'}>${prayer ? escapeHtml(prayer) : "이번 학기 기도제목이 아직 등록되지 않았습니다."}</p>
       </span>
-      <span class="card-action">기도제목 크게 보기</span>
+      <span class="card-foot">
+        <span class="person-badge${badge.waiting ? " is-waiting" : ""}">${badge.text}</span>
+        <span class="card-action">전체 보기 →</span>
+      </span>
     </button>`;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
 }
 
 function servingPersonMarkup(person) {
@@ -66,11 +165,11 @@ function servingPersonMarkup(person) {
       ${avatarMarkup(person, "serving-avatar")}
       <div>
         <div class="serving-person-heading">
-          <h4>${person.name}</h4>
-          <span>${person.grade}</span>
+          <h4>${escapeHtml(koreanName(person.name))}</h4>
+          ${realValue(person.grade) ? `<span>${escapeHtml(realValue(person.grade))}</span>` : ""}
         </div>
-        <p class="serving-team-name">${person.school}</p>
-        <p class="serving-person-bio">${person.bio}</p>
+        ${realValue(person.school) ? `<p class="serving-team-name">${escapeHtml(realValue(person.school))}</p>` : ""}
+        <p class="serving-person-bio">${escapeHtml(person.bio || "")}</p>
       </div>
     </article>`;
 }
@@ -89,7 +188,8 @@ function renderPeople() {
     const people = department[currentRole === "student" ? "students" : "staff"];
     const filtered = people.filter((person) => personMatches(person, query));
 
-    grid.innerHTML = filtered.map(cardMarkup).join("");
+    const counts = partnerCounts();
+    grid.innerHTML = filtered.map((person, index) => cardMarkup(person, index, counts)).join("");
     grid.hidden = filtered.length === 0;
     grid.setAttribute("aria-busy", "false");
     emptyState.hidden = filtered.length !== 0;
@@ -137,18 +237,56 @@ function clearQuery() {
   scheduleRender();
 }
 
+function renderPrayerRecord() {
+  const log = readPrayerLog();
+  const dates = openPersonId ? log[openPersonId] || [] : [];
+  const counts = weeklyCounts(dates);
+  const peak = Math.max(1, ...counts);
+  const bars = [...document.querySelectorAll("#dialogRecordBars i")];
+
+  bars.forEach((bar, index) => {
+    bar.style.height = `${Math.max(8, Math.round((counts[index] / peak) * 100))}%`;
+    bar.parentElement.dataset.current = index === 3 ? "true" : "false";
+  });
+
+  const thisWeek = counts[3];
+  const prayedToday = dates.includes(today());
+  document.querySelector("#dialogRecordCount").textContent = `이번 주 ${thisWeek}회`;
+  const button = document.querySelector("#dialogPray");
+  button.textContent = prayedToday ? "오늘 기도했습니다 ✓" : "오늘 기도 기록하기";
+  button.dataset.prayed = prayedToday ? "true" : "false";
+}
+
+function togglePrayedToday() {
+  if (!openPersonId) return;
+  const log = readPrayerLog();
+  const dates = log[openPersonId] || [];
+  const stamp = today();
+  log[openPersonId] = dates.includes(stamp)
+    ? dates.filter((date) => date !== stamp)
+    : [...dates, stamp];
+  writePrayerLog(log);
+  renderPrayerRecord();
+}
+
 function openPerson(person) {
   const roleLabel = currentRole === "student" ? "학생" : "간사";
+  const meta = personMeta(person);
+  const prayer = realValue(person.prayer);
+  const note = realValue(person.note);
+
+  openPersonId = `${departmentKey}:${currentRole}:${person.id}`;
   personDialog.dataset.role = currentRole;
-  const dialogAvatar = document.querySelector("#dialogAvatar");
-  dialogAvatar.classList.toggle("staff-avatar-photo", Boolean(person.photo));
-  dialogAvatar.textContent = person.photo ? "" : initials(person.name);
-  dialogAvatar.style.setProperty("--staff-photo", person.photo ? `url('${person.photo}')` : "none");
-  dialogAvatar.style.setProperty("--staff-photo-position", person.photoPosition || "center");
-  document.querySelector("#dialogRole").textContent = `${department.name} ${roleLabel}`;
-  document.querySelector("#dialogName").textContent = person.name;
-  document.querySelector("#dialogMeta").textContent = `${person.school} / ${person.grade}`;
-  document.querySelector("#dialogPrayer").textContent = person.prayer;
+  document.querySelector("#dialogRole").textContent = `${department.name} · ${roleLabel}`;
+  document.querySelector("#dialogName").textContent = koreanName(person.name);
+  document.querySelector("#dialogMeta").textContent = [latinName(person.name), meta].filter(Boolean).join(" · ");
+  document.querySelector("#dialogPrayer").textContent = prayer || "이번 학기 기도제목이 아직 등록되지 않았습니다. 이름을 불러 기도해 주세요.";
+
+  const notePanel = document.querySelector("#dialogNote");
+  notePanel.hidden = !note;
+  document.querySelector("#dialogNoteText").textContent = note;
+
+  renderPrayerRecord();
   personDialog.showModal();
 }
 
@@ -174,6 +312,11 @@ clearSearch.addEventListener("click", clearQuery);
 document.querySelector("#emptyClear").addEventListener("click", clearQuery);
 document.querySelector("#retryButton").addEventListener("click", scheduleRender);
 document.querySelector("#dialogClose").addEventListener("click", () => personDialog.close());
+document.querySelector("#dialogPray").addEventListener("click", togglePrayedToday);
+personDialog.addEventListener("close", () => {
+  openPersonId = null;
+  scheduleRender();
+});
 personDialog.addEventListener("click", (event) => {
   if (event.target === personDialog) personDialog.close();
 });
