@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { escapeHtml, isAllowedOrigin, jsonResponse, readJsonBody, validateSignedAssignment } from "./_http.js";
 import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
 import { createPrayerCardPdf } from "./_pdf.js";
-import { findPrayerStudent, pickupCodeForStudent } from "./_students.js";
+import { findPrayerStudent, pickupCodeForStudent, schoolAndGrade } from "./_students.js";
 import { verifyChallenge } from "./_verification.js";
 
 const attemptsByToken = globalThis.__amicusCodeAttempts || new Map();
@@ -14,8 +14,7 @@ function prayerCardHtml({ partnerName, department, student, pickupCode }) {
   const safePartner = escapeHtml(partnerName);
   const safeStudent = escapeHtml(student.name);
   const safeDepartment = escapeHtml(department.name);
-  const safeSchool = escapeHtml(student.school);
-  const safeGrade = escapeHtml(student.grade);
+  const safeSchoolAndGrade = escapeHtml(schoolAndGrade(student));
   const safePrayer = escapeHtml(student.prayer);
   const safePickupCode = escapeHtml(pickupCode);
 
@@ -29,7 +28,7 @@ function prayerCardHtml({ partnerName, department, student, pickupCode }) {
           <p style="margin:22px 0 0;color:#6b6259;line-height:1.7;">첨부된 PDF를 성경이나 휴대전화에 보관하고 이번 학기 동안 함께 기도해 주세요.</p>
           <div style="margin-top:28px;padding:24px;border-radius:14px;background:#f0e4cf;">
             <strong style="display:block;margin-bottom:8px;">${safeDepartment} | ${safePickupCode}</strong>
-            <span style="display:block;color:#6b6259;font-size:13px;">${safeSchool} | ${safeGrade}</span>
+            ${safeSchoolAndGrade ? `<span style="display:block;color:#6b6259;font-size:13px;">${safeSchoolAndGrade}</span>` : ""}
             <p style="margin:20px 0 0;line-height:1.75;">${safePrayer}</p>
           </div>
           <p style="margin:24px 0 0;color:#6b6259;font-size:12px;line-height:1.7;">학생 정보와 기도제목은 기도 목적으로만 사용하고 외부에 공유하지 말아 주세요.</p>
@@ -41,7 +40,7 @@ function prayerCardHtml({ partnerName, department, student, pickupCode }) {
 }
 
 function prayerCardText({ partnerName, department, student, pickupCode }) {
-  return `${partnerName}님, ${student.name} 학생과 연결되었습니다.\n\n부서: ${department.name}\n학교와 학년: ${student.school} | ${student.grade}\n수령번호: ${pickupCode}\n\n기도제목\n${student.prayer}\n\n첨부된 PDF 기도카드를 이번 학기 동안 보관해 주세요. 학생 정보와 기도제목은 기도 목적으로만 사용하고 외부에 공유하지 말아 주세요.\n\nAMICUS NEXT CHURCH`;
+  return `${partnerName}님, ${student.name} 학생과 연결되었습니다.\n\n부서: ${department.name}\n${schoolAndGrade(student, " | ") ? `학교와 학년: ${schoolAndGrade(student, " | ")}\n` : ""}수령번호: ${pickupCode}\n\n기도제목\n${student.prayer}\n\n첨부된 PDF 기도카드를 이번 학기 동안 보관해 주세요. 학생 정보와 기도제목은 기도 목적으로만 사용하고 외부에 공유하지 말아 주세요.\n\nAMICUS NEXT CHURCH`;
 }
 
 export default {

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, rgb } from "pdf-lib";
+import { schoolAndGrade } from "./_students.js";
 
 function hexColor(value) {
   const hex = value.replace("#", "");
@@ -97,17 +98,20 @@ export async function createPrayerCardPdf({ partnerName, department, student, pi
   });
   page.drawLine({ start: { x: 94, y: 365 }, end: { x: 382, y: 365 }, thickness: 0.7, color: rule });
 
-  page.drawText("학교 / 학년", { x: 32, y: 342, size: 10.5, font, color: olive });
-  drawWrappedText(page, `${student.school} / ${student.grade}`, {
-    x: 112,
-    y: 342,
-    size: 8.5,
-    lineHeight: 12,
-    maxWidth: 125,
-    font,
-    color: oliveDark
-  });
-  page.drawLine({ start: { x: 111, y: 322 }, end: { x: 236, y: 322 }, thickness: 0.7, color: rule });
+  const schoolLine = schoolAndGrade(student);
+  if (schoolLine) {
+    page.drawText("학교 / 학년", { x: 32, y: 342, size: 10.5, font, color: olive });
+    drawWrappedText(page, schoolLine, {
+      x: 112,
+      y: 342,
+      size: 8.5,
+      lineHeight: 12,
+      maxWidth: 125,
+      font,
+      color: oliveDark
+    });
+    page.drawLine({ start: { x: 111, y: 322 }, end: { x: 236, y: 322 }, thickness: 0.7, color: rule });
+  }
 
   page.drawText("기도 제목", { x: 32, y: 274, size: 14, font, color: olive });
   page.drawLine({ start: { x: 32, y: 262 }, end: { x: 224, y: 262 }, thickness: 0.7, color: rule });
