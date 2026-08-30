@@ -6,7 +6,7 @@
   <meta name="description" content="아미쿠스 넥스트 교육부 학생과 간사 Prayer Partners 기도 디렉터리입니다.">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <title>부서 기도 디렉터리 | AMICUS NEXT</title>
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body class="directory-page" data-department="preschool">
   <a class="skip-link" href="#main">본문으로 바로가기</a>
@@ -113,28 +113,46 @@
   </main>
 
   <dialog class="person-dialog" id="personDialog" aria-labelledby="dialogName">
-    <button type="button" class="dialog-close" id="dialogClose" aria-label="상세 창 닫기">닫기</button>
     <div class="dialog-heading">
-      <span class="avatar avatar-large" id="dialogAvatar" aria-hidden="true"></span>
       <div>
         <p id="dialogRole"></p>
         <h2 id="dialogName"></h2>
         <span id="dialogMeta"></span>
       </div>
+      <button type="button" class="dialog-close" id="dialogClose" aria-label="상세 창 닫기">×</button>
     </div>
+
     <div class="dialog-prayer">
-      <span>함께 기도해 주세요</span>
+      <span>이번 학기 기도제목</span>
       <p id="dialogPrayer"></p>
     </div>
-    <p class="dialog-reminder">한 번 더 이름을 불러 기도해 주세요.</p>
+
+    <div class="dialog-note" id="dialogNote" hidden>
+      <span>간사 노트</span>
+      <p id="dialogNoteText"></p>
+    </div>
+
+    <div class="dialog-record">
+      <span class="dialog-record-label">최근 4주</span>
+      <ol class="dialog-record-bars" id="dialogRecordBars" aria-hidden="true">
+        <li><i></i></li>
+        <li><i></i></li>
+        <li><i></i></li>
+        <li><i></i></li>
+      </ol>
+      <span class="dialog-record-count" id="dialogRecordCount"></span>
+    </div>
+
+    <button type="button" class="dialog-pray" id="dialogPray"></button>
+    <p class="dialog-reminder">기도 기록은 이 기기에만 저장됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요.</p>
   </dialog>
 
   <footer class="site-footer compact-footer">
     <strong>AMICUS NEXT CHURCH</strong>
-    <p>Prayer Partners 기도 디렉터리</p>
+    <p>화면 캡처와 외부 공유는 하지 말아 주세요</p>
   </footer>
 
   <script src="data.js?v=22"></script>
-  <script src="directory.js?v=8"></script>
+  <script src="directory.js?v=9"></script>
 </body>
 </html>
