@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="아미쿠스 넥스트 기도 파트너 신청 안내판과 16주 기도동행 키트입니다.">
+  <title>기도 파트너 인쇄물 | AMICUS NEXT</title>
+  <link rel="stylesheet" href="printables.css?v=11">
+</head>
+<body>
+  <a class="skip-link" href="#main">인쇄물로 바로가기</a>
+
+  <header class="print-site-header">
+    <a class="print-brand" href="index.html" aria-label="아미쿠스 넥스트 홈">
+      <span>AN</span>
+      <strong>AMICUS NEXT</strong>
+    </a>
+    <a href="partner.html">신청 화면 보기</a>
+  </header>
+
+  <main id="main">
+    <section class="print-controls" aria-labelledby="printControlTitle">
+      <div>
+        <p>PRAYER PARTNER PRINTS</p>
+        <h1 id="printControlTitle">기도 파트너 인쇄물</h1>
+        <span>신청 안내판과 16주 기도동행 키트는 실제 인쇄 크기로 설정되어 있습니다.</span>
+      </div>
+      <div class="url-control">
+        <label for="partnerUrl">QR에 연결할 신청 주소</label>
+        <input id="partnerUrl" type="url" inputmode="url" autocomplete="url">
+        <small id="partnerUrlHelp">인쇄 전 실제 배포된 신청 주소인지 확인해 주세요.</small>
+        <div class="event-code-preview"><span>현장 신청코드</span><strong id="printEventCode">AMICUS26</strong></div>
+        <span class="url-error" id="partnerUrlError" role="alert"></span>
+        <button type="button" id="updatePrintQr">QR 주소 적용</button>
+      </div>
+    </section>
+
+    <section class="artifact-section poster-section" aria-labelledby="posterSectionTitle">
+      <div class="artifact-heading">
+        <div>
+          <h2 id="posterSectionTitle">기도 파트너 QR 포스터</h2>
+          <p>US Letter 8.5 × 11인치</p>
+        </div>
+        <button type="button" data-print="poster">포스터 인쇄</button>
+      </div>
+
+      <div class="artboard-wrap">
+        <article class="poster-artboard" id="posterArtboard">
+          <header class="poster-header">
+            <p>BACK TO SCHOOL SUNDAY</p>
+            <div class="poster-heading-row">
+              <h1><span>한 학기</span><strong>기도동행</strong></h1>
+              <div class="poster-term" aria-label="16주 동안"><strong>16</strong><span>WEEKS</span></div>
+            </div>
+            <p class="poster-lede">현장에서 함께 기도하고,<br>QR로 한 학생과 연결됩니다.</p>
+          </header>
+
+          <section class="poster-journey" aria-label="기도의 벽과 기도동행 안내">
+            <div><strong>기도의 벽</strong><span>학생의 기도제목을 읽고<br>손을 얹어 기도해 주세요.</span></div>
+            <div><strong>기도동행</strong><span>QR로 신청하면 한 학생과<br>한 학기 동안 연결됩니다.</span></div>
+          </section>
+
+          <section class="poster-application" aria-label="기도동행 신청 안내">
+            <div class="poster-qr" id="posterPrintQr" aria-label="기도 파트너 신청 QR 코드"></div>
+            <h2>QR 스캔하고 신청하기</h2>
+            <p>신청 카드 작성 · 학생 자동 매칭 · PDF 기도카드 수령</p>
+            <div class="poster-code">
+              <span>현장 신청코드</span>
+              <strong id="posterEventCode">AMICUS26</strong>
+            </div>
+            <small id="posterUrlLabel"></small>
+          </section>
+
+          <footer class="poster-footer">
+            <p>“내가 너를 지명하여 불렀나니 너는 내 것이라”</p>
+            <span>이사야 43:1</span>
+            <strong>AMICUS NEXT CHURCH</strong>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section class="artifact-section guide-card-section" aria-labelledby="guideCardSectionTitle">
+      <div class="artifact-heading">
+        <div>
+          <h2 id="guideCardSectionTitle">한 학기 기도동행 키트</h2>
+          <p>완성 크기 100 × 210mm 카드 2종, US Letter 한 장</p>
+        </div>
+        <button type="button" data-print="guide-card">기도 키트 인쇄</button>
+      </div>
+
+      <div class="artboard-wrap guide-card-wrap">
+        <div class="guide-card-sheet" aria-label="16주 기도동행 키트 인쇄 시트">
+          <article class="prayer-guide-card kit-guide-card">
+            <div class="guide-card-image"><img src="assets/prayer-hands-print.png" alt="서로 맞대어 기도하는 두 손의 선 그림"></div>
+            <div class="guide-card-content">
+              <header class="kit-card-heading">
+                <div><p class="guide-term">2026 가을학기</p><h3>기도동행 카드</h3></div>
+                <span class="kit-card-count" aria-label="10분 기도"><b>10</b>MIN</span>
+              </header>
+              <div class="student-fields">
+                <label>학생 이름<span></span></label>
+                <label>부서<span></span></label>
+              </div>
+              <section class="ten-minute-guide" aria-label="10분 기도 가이드">
+                <header><strong>10분 기도 가이드</strong><span>일주일에 한 번, 이름을 불러 기도해 주세요.</span></header>
+                <ol>
+                  <li><strong>1분</strong><span>잠잠히 학생의 이름을 떠올립니다.</span></li>
+                  <li><strong>2분</strong><span>학생을 보내 주신 하나님께 감사합니다.</span></li>
+                  <li><strong>3분</strong><span>온라인 기도카드의 기도제목을 읽고 기도합니다.</span></li>
+                  <li><strong>2분</strong><span>학교, 친구, 가정과 믿음을 위해 축복합니다.</span></li>
+                  <li><strong>2분</strong><span>말씀을 붙들고 이번 주의 걸음을 맡깁니다.</span></li>
+                </ol>
+              </section>
+              <p class="email-card-note">학생의 기도제목은 이메일로 받은 PDF 기도카드에서 확인합니다.</p>
+              <section class="prayer-note-space" aria-label="기도 메모 작성 공간">
+                <strong>기도 메모</strong>
+                <span></span><span></span><span></span><span></span>
+              </section>
+              <blockquote>“내가 너를 지명하여 불렀나니 너는 내 것이라” <span>이사야 43:1</span></blockquote>
+              <footer>AMICUS NEXT CHURCH</footer>
+            </div>
+          </article>
+
+          <article class="prayer-guide-card kit-tracker-card">
+            <div class="guide-card-image tracker-card-image"><img src="assets/semester-prayer-kit.png" alt="새싹을 품은 두 손과 주간표를 표현한 선 그림"></div>
+            <div class="guide-card-content tracker-card-content">
+              <header class="kit-card-heading">
+                <div><p class="guide-term">2026 가을학기</p><h3>16주 기도표</h3></div>
+                <span class="kit-card-count" aria-label="16주 기도"><b>16</b>WEEKS</span>
+              </header>
+              <p class="tracker-intro">기도한 주에 표시하고, 부서 행사가 있는 주에는 한 번 더 축복해 주세요.</p>
+              <div class="tracker-student-field">
+                <label>학생 이름<span></span></label>
+              </div>
+              <div class="semester-check tracker-weeks">
+                <strong>WEEK 01-16</strong>
+                <div class="week-grid" aria-label="1주부터 16주까지 기도 체크"></div>
+              </div>
+              <section class="event-notes" aria-label="부서 행사 기도 메모">
+                <header><strong>EVENT</strong><span>부서 행사와 학생의 참여를 위해 기도해 주세요.</span></header>
+                <div class="event-row"><b>행사 1</b><span>날짜</span><i></i></div>
+                <div class="event-row"><b>행사 2</b><span>날짜</span><i></i></div>
+                <div class="event-row"><b>행사 3</b><span>날짜</span><i></i></div>
+              </section>
+              <footer>AMICUS NEXT CHURCH</footer>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="artifact-section bulletin-section" aria-labelledby="bulletinSectionTitle">
+      <div class="artifact-heading">
+        <div>
+          <h2 id="bulletinSectionTitle">주보용 기도 파트너 삽지</h2>
+          <p>완성 크기 4.25 × 5.5인치, US Letter 한 장에 4개</p>
+        </div>
+        <button type="button" data-print="bulletin">주보 삽지 인쇄</button>
+      </div>
+
+      <div class="artboard-wrap bulletin-wrap">
+        <div class="bulletin-sheet" aria-label="주보용 기도 파트너 삽지 인쇄 시트">
+          <article class="bulletin-insert">
+            <div class="bulletin-image"><img src="assets/prayer-hands-print.png" alt="서로 기대어 기도하는 두 손의 선 그림"></div>
+            <div class="bulletin-content">
+              <p>2026 가을학기</p>
+              <h3>한 학생의 이름을 품고<br>함께 기도해 주세요.</h3>
+              <span>QR로 신청하면 희망 부서의 학생과 자동으로 연결됩니다.</span>
+              <div class="bulletin-action">
+                <ol><li>신청 카드 작성</li><li>학생 자동 매칭</li><li>한 학기 동안 주 1회 기도</li></ol>
+                <aside><div class="bulletin-qr" aria-label="기도 파트너 신청 QR 코드"></div><strong>지금 신청하기</strong></aside>
+              </div>
+              <small>학생 기도카드는 온라인에서 확인하거나 PDF로 저장할 수 있습니다.</small>
+              <footer>AMICUS NEXT CHURCH</footer>
+            </div>
+          </article>
+
+          <article class="bulletin-insert" aria-hidden="true">
+            <div class="bulletin-image"><img src="assets/prayer-hands-print.png" alt=""></div>
+            <div class="bulletin-content"><p>2026 가을학기</p><h3>한 학생의 이름을 품고<br>함께 기도해 주세요.</h3><span>QR로 신청하면 희망 부서의 학생과 자동으로 연결됩니다.</span><div class="bulletin-action"><ol><li>신청 카드 작성</li><li>학생 자동 매칭</li><li>한 학기 동안 주 1회 기도</li></ol><aside><div class="bulletin-qr"></div><strong>지금 신청하기</strong></aside></div><small>학생 기도카드는 온라인에서 확인하거나 PDF로 저장할 수 있습니다.</small><footer>AMICUS NEXT CHURCH</footer></div>
+          </article>
+
+          <article class="bulletin-insert" aria-hidden="true">
+            <div class="bulletin-image"><img src="assets/prayer-hands-print.png" alt=""></div>
+            <div class="bulletin-content"><p>2026 가을학기</p><h3>한 학생의 이름을 품고<br>함께 기도해 주세요.</h3><span>QR로 신청하면 희망 부서의 학생과 자동으로 연결됩니다.</span><div class="bulletin-action"><ol><li>신청 카드 작성</li><li>학생 자동 매칭</li><li>한 학기 동안 주 1회 기도</li></ol><aside><div class="bulletin-qr"></div><strong>지금 신청하기</strong></aside></div><small>학생 기도카드는 온라인에서 확인하거나 PDF로 저장할 수 있습니다.</small><footer>AMICUS NEXT CHURCH</footer></div>
+          </article>
+
+          <article class="bulletin-insert" aria-hidden="true">
+            <div class="bulletin-image"><img src="assets/prayer-hands-print.png" alt=""></div>
+            <div class="bulletin-content"><p>2026 가을학기</p><h3>한 학생의 이름을 품고<br>함께 기도해 주세요.</h3><span>QR로 신청하면 희망 부서의 학생과 자동으로 연결됩니다.</span><div class="bulletin-action"><ol><li>신청 카드 작성</li><li>학생 자동 매칭</li><li>한 학기 동안 주 1회 기도</li></ol><aside><div class="bulletin-qr"></div><strong>지금 신청하기</strong></aside></div><small>학생 기도카드는 온라인에서 확인하거나 PDF로 저장할 수 있습니다.</small><footer>AMICUS NEXT CHURCH</footer></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/qrcode.min.js"></script>
+  <script src="data.js?v=22"></script>
+  <script src="printables.js?v=7"></script>
+</body>
+</html>

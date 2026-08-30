@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="아미쿠스 넥스트 기도 파트너 신청과 학생 자동 매칭 페이지입니다.">
+  <title>기도 파트너 신청 | AMICUS NEXT</title>
+  <link rel="stylesheet" href="styles.css?v=13">
+</head>
+<body class="partner-page">
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">AN</span>
+      <span class="brand-copy"><strong>AMICUS NEXT</strong><small>PRAYER PARTNERS</small></span>
+    </a>
+    <a class="header-action" href="index.html">소개 보기</a>
+  </header>
+
+  <main id="main">
+    <div id="applicationView">
+      <section class="join-hero">
+        <div class="join-hero-copy">
+          <p class="eyebrow">PRAYER PARTNER</p>
+          <h1>한 사람을 위한<br>한 학기의 기도.</h1>
+          <p>신청서를 작성하면 이번 학기에 함께 기도할 학생을 바로 연결해 드립니다.</p>
+        </div>
+        <figure class="join-hero-image">
+          <img src="assets/three-journeys.jpg" alt="한 학기의 성장과 여정을 상징하는 노트, 식물, 지도">
+        </figure>
+      </section>
+
+      <section class="participation-bridge" aria-label="기도의 벽과 기도동행 참여 안내">
+        <div class="participation-wall">
+          <span>현장 참여</span>
+          <strong>기도의 벽</strong>
+          <p>이미 작성된 기도제목을 읽고, 손바닥 위에 손을 얹어 그 자리에서 기도합니다.</p>
+        </div>
+        <div class="participation-partner">
+          <span>한 학기 참여</span>
+          <strong>기도동행 신청</strong>
+          <p>이 페이지에서 신청하면 한 학생과 연결되고, 학기 동안 기도할 카드를 받습니다.</p>
+        </div>
+      </section>
+
+      <section class="application-section" aria-labelledby="applicationTitle">
+        <aside class="application-aside">
+          <h2 id="applicationTitle">기도 파트너가 되어주세요.</h2>
+          <p>매주 학생의 이름을 불러 기도하고, 기도제목은 외부에 공유하지 않기로 약속해 주세요.</p>
+          <div class="commitment-list">
+            <div><strong>신청</strong><span>기본 정보와 희망 부서를 작성합니다.</span></div>
+            <div><strong>매칭</strong><span>학생별 배정 수를 고려해 자동으로 연결합니다.</span></div>
+            <div><strong>기도</strong><span>저장된 기도카드를 학기 동안 다시 확인합니다.</span></div>
+          </div>
+        </aside>
+
+        <form class="application-card" id="partnerForm" novalidate>
+          <div class="form-heading">
+            <span>2026 가을학기</span>
+            <h2>파트너 신청 카드</h2>
+            <p>안내판의 신청코드와 필수 항목을 작성해 주세요.</p>
+          </div>
+
+          <div class="form-field event-code-field">
+            <label for="eventCode">행사 신청코드</label>
+            <input id="eventCode" name="eventCode" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="12" aria-describedby="eventCodeHelp eventCodeError" required>
+            <span class="field-help" id="eventCodeHelp">안내판의 QR로 접속하면 자동으로 입력됩니다. 직접 접속했다면 안내판의 코드를 입력해 주세요.</span>
+            <span class="field-error" id="eventCodeError"></span>
+          </div>
+
+          <div class="form-field">
+            <label for="partnerName">이름</label>
+            <input id="partnerName" name="partnerName" type="text" autocomplete="name" maxlength="40" required>
+            <span class="field-help">기도 파트너 본인의 이름을 적어주세요.</span>
+            <span class="field-error" id="partnerNameError"></span>
+          </div>
+
+          <div class="form-field">
+            <label for="partnerEmail">이메일</label>
+            <input id="partnerEmail" name="partnerEmail" type="email" autocomplete="email" maxlength="120" required>
+            <span class="field-help">인증코드와 매칭된 학생의 PDF 기도카드를 보내드립니다.</span>
+            <span class="field-error" id="partnerEmailError"></span>
+          </div>
+
+          <fieldset class="department-choice">
+            <legend>희망 부서</legend>
+            <p>모든 학생이 연결된 부서는 자동으로 마감됩니다.</p>
+            <div class="choice-grid">
+              <label>
+                <input type="radio" name="departmentPreference" value="any" checked>
+                <span><strong>전체 부서</strong><small>가장 필요한 학생과 연결</small><em id="availabilityAny"></em></span>
+              </label>
+              <label>
+                <input type="radio" name="departmentPreference" value="preschool">
+                <span><strong>유아-유치부</strong><small>만 2세-4세</small><em id="availabilityPreschool"></em></span>
+              </label>
+              <label>
+                <input type="radio" name="departmentPreference" value="elementaryJr">
+                <span><strong>유년부</strong><small>만 5세-2학년</small><em id="availabilityElementaryJr"></em></span>
+              </label>
+              <label>
+                <input type="radio" name="departmentPreference" value="elementary">
+                <span><strong>초등부</strong><small>3학년-5학년</small><em id="availabilityElementary"></em></span>
+              </label>
+              <label class="choice-wide">
+                <input type="radio" name="departmentPreference" value="youth">
+                <span><strong>중고등부</strong><small>6학년-12학년</small><em id="availabilityYouth"></em></span>
+              </label>
+            </div>
+            <p class="availability-summary" id="availabilitySummary" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="form-field">
+            <label for="prayerRhythm">기도 약속</label>
+            <select id="prayerRhythm" name="prayerRhythm" required>
+              <option value="">선택해 주세요</option>
+              <option value="weekly">매주 한 번 이름을 불러 기도하겠습니다.</option>
+              <option value="three-times">주 3회 기도하겠습니다.</option>
+              <option value="daily">매일 짧게라도 기도하겠습니다.</option>
+            </select>
+            <span class="field-error" id="prayerRhythmError"></span>
+          </div>
+
+          <label class="consent-field">
+            <input id="privacyConsent" name="privacyConsent" type="checkbox" required>
+            <span>학생의 이름과 기도제목을 기도 목적으로만 사용하고, 캡처하거나 외부에 공유하지 않겠습니다.</span>
+          </label>
+          <span class="field-error consent-error" id="privacyConsentError"></span>
+
+          <div class="form-alert" id="formAlert" role="alert" hidden></div>
+          <button class="submit-button" id="submitPartner" type="submit">신청하고 학생 만나기</button>
+          <p class="storage-note">이메일 확인 후 매칭 결과가 이 기기에 저장되고 PDF가 이메일로 발송됩니다.</p>
+        </form>
+      </section>
+    </div>
+
+    <section class="email-verification-view" id="emailVerificationView" hidden aria-labelledby="verificationTitle">
+      <div class="email-verification-card">
+        <p>이메일 확인</p>
+        <h1 id="verificationTitle">6자리 인증코드를<br>입력해 주세요.</h1>
+        <p id="verificationEmailMessage"></p>
+
+        <form id="verificationForm" novalidate>
+          <label for="verificationCode">이메일 인증코드</label>
+          <input id="verificationCode" name="verificationCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" aria-describedby="verificationHelp verificationError" required>
+          <span id="verificationHelp">코드를 확인하면 학생 매칭과 PDF 이메일 발송이 바로 진행됩니다.</span>
+          <span class="field-error" id="verificationError" role="alert"></span>
+          <button class="submit-button" id="verifyEmail" type="submit">인증하고 PDF 받기</button>
+        </form>
+
+        <button class="verification-resend" id="resendVerification" type="button">인증코드 다시 받기</button>
+        <button class="verification-back" id="backToApplication" type="button">이메일 주소 다시 입력하기</button>
+      </div>
+    </section>
+
+    <section class="matching-view" id="matchingView" hidden aria-live="polite" aria-busy="true">
+      <div class="matching-card">
+        <div class="matching-pages" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p>이메일을 확인했습니다.</p>
+        <h1>학생을 연결하고 PDF를<br>보내고 있어요.</h1>
+      </div>
+    </section>
+
+    <section class="result-view" id="resultView" hidden aria-labelledby="resultTitle">
+      <div class="result-message">
+        <p id="resultPartnerName"></p>
+        <h1 id="resultTitle" tabindex="-1"><span id="resultStudentName"></span> 학생을 위해<br>기도해 주세요.</h1>
+        <p>기도카드는 이 기기에 저장되며, 이메일로 받은 PDF도 학기 동안 보관할 수 있습니다.</p>
+        <div class="result-email-delivery" id="resultEmailDelivery" aria-live="polite">
+          <strong id="resultEmailTitle"></strong>
+          <p id="resultEmailDetail"></p>
+        </div>
+      </div>
+
+      <article class="assigned-prayer-card" id="assignedPrayerCard">
+        <div class="assigned-card-top">
+          <span class="assigned-term">2026 가을학기</span>
+          <span class="assigned-department" id="resultDepartment"></span>
+        </div>
+        <div class="assigned-identity">
+          <span class="assigned-avatar" id="resultAvatar" aria-hidden="true"></span>
+          <div class="assigned-identity-fields">
+            <div class="assigned-field assigned-name-field">
+              <span>이름</span>
+              <h2 id="resultCardName"></h2>
+            </div>
+            <div class="assigned-field assigned-school-field">
+              <span>학교 / 학년</span>
+              <p><span id="resultSchool"></span> / <span id="resultGrade"></span></p>
+            </div>
+          </div>
+        </div>
+        <div class="assigned-prayer">
+          <span>기도 제목</span>
+          <p id="resultPrayer"></p>
+        </div>
+        <footer>
+          <strong>AMICUS NEXT CHURCH</strong>
+          <span>한 학기 기도동행</span>
+        </footer>
+      </article>
+
+      <section class="kit-pickup" aria-labelledby="kitPickupTitle">
+        <div class="pickup-number">
+          <span>가이드 카드 수령번호</span>
+          <strong id="resultPickupCode"></strong>
+        </div>
+        <div class="pickup-copy">
+          <h2 id="kitPickupTitle">이 화면을 안내 데스크에 보여 주세요.</h2>
+          <p>현장에서는 같은 번호의 한 학기 기도동행 가이드 카드 한 장을 받아 주세요. 학생 기도카드는 이 화면에서 확인합니다.</p>
+              <small>학생 기도카드 PDF는 이메일 인증이 완료된 주소로 전달됩니다.</small>
+        </div>
+      </section>
+
+      <div class="result-actions">
+        <button type="button" id="printPrayerCard">기도카드 PDF 저장</button>
+        <a href="index.html">홈으로</a>
+      </div>
+      <button class="return-application" type="button" id="showApplicationAgain">신청 정보 다시 입력하기</button>
+    </section>
+  </main>
+
+  <footer class="site-footer compact-footer partner-footer">
+    <strong>AMICUS NEXT CHURCH</strong>
+    <p>기도 파트너 신청과 자동 매칭</p>
+  </footer>
+
+  <script src="data.js?v=22"></script>
+  <script src="partner.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="아미쿠스 넥스트 기도 파트너 QR과 신청 현황 화면입니다.">
+  <title>기도 파트너 운영자 도구 | AMICUS NEXT</title>
+  <link rel="stylesheet" href="styles.css?v=13">
+</head>
+<body class="admin-page">
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">AN</span>
+      <span class="brand-copy"><strong>AMICUS NEXT</strong><small>PRAYER PARTNERS</small></span>
+    </a>
+    <a class="header-action" href="printables.html">인쇄물 보기</a>
+  </header>
+
+  <main id="main" class="admin-main">
+    <section class="admin-heading">
+      <p class="eyebrow">STAFF ONLY</p>
+      <h1>기도 파트너<br>운영자 도구</h1>
+      <p>담당자가 신청 주소를 관리하고, 부서별 매칭 현황을 확인하는 내부 화면입니다.</p>
+    </section>
+
+    <section class="qr-workspace" aria-labelledby="qrTitle">
+      <div class="qr-card">
+        <div class="qr-code-frame" id="qrCode" aria-label="기도 파트너 신청 QR 코드"></div>
+        <div class="qr-caption">
+          <strong>기도 파트너 신청</strong>
+          <span>카메라로 QR 코드를 스캔해 주세요.</span>
+        </div>
+      </div>
+      <div class="qr-settings">
+        <h2 id="qrTitle">신청 QR 만들기</h2>
+        <p>사이트를 배포한 뒤 실제 신청 페이지 주소를 입력하면 휴대폰에서 열리는 QR이 만들어집니다.</p>
+        <div class="form-field">
+          <label for="qrTarget">신청 페이지 주소</label>
+          <input id="qrTarget" type="url" inputmode="url" autocomplete="url">
+          <span class="field-help">로컬 주소는 같은 컴퓨터에서만 열립니다. 실제 사용 시 배포 주소가 필요합니다.</span>
+          <span class="field-error" id="qrTargetError"></span>
+        </div>
+        <div class="qr-actions">
+          <button type="button" id="generateQr">QR 새로 만들기</button>
+          <button type="button" class="secondary-button" id="downloadQr">QR 이미지 저장</button>
+          <a class="secondary-button" href="printables.html">포스터와 가이드 카드</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-summary" aria-labelledby="summaryTitle">
+      <div class="admin-section-heading">
+        <h2 id="summaryTitle">이번 학기 신청 현황</h2>
+        <button type="button" id="exportApplications">신청 목록 내보내기</button>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-primary"><span>전체 파트너</span><strong id="totalApplications">0</strong></div>
+        <div><span>유아-유치부</span><strong id="preschoolApplications">0</strong></div>
+        <div><span>유년부</span><strong id="elementaryJrApplications">0</strong></div>
+        <div><span>초등부</span><strong id="elementaryApplications">0</strong></div>
+        <div><span>중고등부</span><strong id="youthApplications">0</strong></div>
+      </div>
+    </section>
+
+    <section class="recent-section" aria-labelledby="recentTitle">
+      <div class="admin-section-heading">
+        <div>
+          <h2 id="recentTitle">최근 매칭</h2>
+          <p>파트너 연락처와 매칭된 학생을 확인합니다.</p>
+        </div>
+      </div>
+      <div class="recent-list" id="recentList"></div>
+      <div class="admin-empty" id="adminEmpty" hidden>
+        <h3>아직 신청이 없습니다.</h3>
+        <p>이 브라우저에서 신청 테스트를 완료하면 여기에 표시됩니다.</p>
+        <a href="partner.html">신청 화면 테스트</a>
+      </div>
+    </section>
+
+    <section class="production-note">
+      <strong>실제 운영 전 확인</strong>
+      <p>현재 기록은 같은 브라우저에서만 보입니다. 여러 휴대폰의 신청을 실시간으로 모으고 중복 배정을 막으려면 중앙 데이터베이스와 관리자 로그인을 연결해야 합니다.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer compact-footer">
+    <strong>AMICUS NEXT CHURCH</strong>
+    <p>기도 파트너 운영 화면</p>
+  </footer>
+
+  <script src="assets/qrcode.min.js"></script>
+  <script src="data.js?v=22"></script>
+  <script src="admin.js?v=5"></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+:root {
+  color-scheme: light;
+  --paper: #f4f0e5;
+  --ink: #173f2d;
+  --ink-soft: #355a46;
+  --rust: #b64a2e;
+  --line: rgba(23, 63, 45, 0.3);
+  --panel: rgba(250, 248, 241, 0.9);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  background: #d8d5cc;
+  color: var(--ink);
+  font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.poster {
+  position: relative;
+  isolation: isolate;
+  width: 8.5in;
+  height: 11in;
+  overflow: hidden;
+  padding: 0.43in 0.5in 0.34in;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 0.24in;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(rgba(244, 240, 229, 0.15), rgba(244, 240, 229, 0.15)),
+    url("assets/prayer-partner-poster-bg-2026.png");
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 22px 70px rgba(30, 38, 31, 0.2);
+}
+
+.poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0.1), rgba(238, 232, 218, 0.14));
+  pointer-events: none;
+}
+
+.poster-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.14in;
+  border-bottom: 1px solid var(--line);
+}
+
+.poster-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.11in;
+}
+
+.poster-brand-mark {
+  width: 0.34in;
+  height: 0.34in;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fbf8ef;
+  font-size: 8pt;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.poster-brand span:last-child {
+  display: grid;
+  gap: 0.01in;
+}
+
+.poster-brand strong,
+.poster-season {
+  font-size: 7.5pt;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.poster-brand small {
+  font-size: 5.5pt;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.poster-season {
+  margin: 0;
+}
+
+.poster-hero {
+  position: relative;
+  min-height: 2.17in;
+}
+
+.poster-kicker {
+  margin: 0 0 0.06in;
+  color: var(--rust);
+  font-size: 8pt;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.poster-hero h1 {
+  margin: 0;
+  max-width: 5.25in;
+  font-size: 47pt;
+  font-weight: 950;
+  line-height: 0.94;
+  letter-spacing: -0.08em;
+  white-space: nowrap;
+}
+
+.poster-tagline {
+  margin: 0.17in 0 0;
+  font-size: 18pt;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.poster-intro {
+  max-width: 4.75in;
+  margin: 0.06in 0 0;
+  color: var(--ink-soft);
+  font-size: 10pt;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.poster-term {
+  position: absolute;
+  top: 0.02in;
+  right: 0.02in;
+  width: 0.82in;
+  height: 0.82in;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  border: 1.2px solid var(--rust);
+  border-radius: 50%;
+  color: var(--rust);
+}
+
+.poster-term strong {
+  font-size: 17pt;
+  line-height: 1;
+}
+
+.poster-term span {
+  margin-top: 0.025in;
+  font-size: 5pt;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.poster-path {
+  min-height: 0.76in;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.poster-path > div {
+  padding: 0.14in 0.15in 0.12in;
+  display: grid;
+  align-content: center;
+  gap: 0.04in;
+}
+
+.poster-path > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.poster-path strong {
+  color: var(--rust);
+  font-size: 8pt;
+  font-weight: 900;
+}
+
+.poster-path span {
+  max-width: 1.7in;
+  color: var(--ink-soft);
+  font-size: 6.8pt;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.poster-action {
+  min-height: 3.58in;
+  padding: 0.22in 0.34in;
+  display: grid;
+  grid-template-columns: minmax(2.48in, 0.85fr) minmax(0, 1.35fr);
+  align-self: center;
+  align-items: center;
+  gap: 0.34in;
+  border: 1px solid rgba(23, 63, 45, 0.34);
+  border-radius: 0.16in;
+  background: var(--panel);
+  box-shadow: 0 14px 38px rgba(38, 56, 42, 0.09);
+}
+
+.poster-invitation {
+  grid-column: 2;
+  align-self: center;
+  padding: 0.04in 0 0.04in 0.08in;
+}
+
+.poster-invitation-label {
+  margin: 0 0 0.11in;
+  color: var(--rust);
+  font-size: 7pt;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.poster-invitation h2 {
+  margin: 0;
+  font-size: 24pt;
+  font-weight: 950;
+  line-height: 1.2;
+  letter-spacing: -0.065em;
+}
+
+.poster-invitation > p:last-child {
+  max-width: 3.45in;
+  margin: 0.2in 0 0;
+  color: var(--ink-soft);
+  font-size: 9.2pt;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.poster-qr-panel {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 3.04in;
+  padding: 0.02in 0.34in 0.02in 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  border-right: 1px solid var(--line);
+}
+
+.poster-qr-frame {
+  width: 2.18in;
+  height: 2.18in;
+  padding: 0.075in;
+  border: 1px solid var(--line);
+  border-radius: 0.08in;
+  background: #fbf8ef;
+}
+
+.poster-qr-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.poster-qr-panel h2 {
+  margin: 0.12in 0 0.07in;
+  font-size: 12pt;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.poster-code {
+  min-width: 2.12in;
+  min-height: 0.3in;
+  margin: 0;
+  padding: 0 0.12in;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fbf8ef;
+}
+
+.poster-code span {
+  font-size: 6pt;
+  font-weight: 800;
+}
+
+.poster-code strong {
+  font-size: 7.5pt;
+  letter-spacing: 0.08em;
+}
+
+.poster-url {
+  margin: 0.08in 0 0;
+  color: var(--ink-soft);
+  font-size: 5.7pt;
+  font-weight: 700;
+}
+
+.poster-footer {
+  padding-top: 0.16in;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.35in;
+  border-top: 1px solid var(--line);
+}
+
+.poster-footer blockquote {
+  margin: 0;
+}
+
+.poster-footer blockquote p {
+  margin: 0;
+  font-size: 8.5pt;
+  font-weight: 900;
+}
+
+.poster-footer cite {
+  display: block;
+  margin-top: 0.03in;
+  color: var(--ink-soft);
+  font-size: 6.5pt;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.poster-privacy {
+  max-width: 2.7in;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 6.2pt;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: right;
+}
+
+@page {
+  size: Letter portrait;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: 8.5in;
+    height: 11in;
+    background: var(--paper);
+  }
+
+  .poster {
+    box-shadow: none;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  body {
+    align-items: start;
+  }
+
+  .poster {
+    transform-origin: top left;
+  }
+}

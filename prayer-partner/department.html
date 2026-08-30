@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="아미쿠스 넥스트 교육부 학생과 간사 Prayer Partners 기도 디렉터리입니다.">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <title>부서 기도 디렉터리 | AMICUS NEXT</title>
+  <link rel="stylesheet" href="styles.css?v=13">
+</head>
+<body class="directory-page" data-department="preschool">
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+
+  <header class="site-header directory-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">AN</span>
+      <span class="brand-copy"><strong>AMICUS NEXT</strong><small>PRAYER PARTNERS</small></span>
+    </a>
+    <nav class="department-nav" aria-label="부서 선택">
+      <a href="department.html?dept=preschool" data-nav-dept="preschool">유아-유치부</a>
+      <a href="department.html?dept=elementaryJr" data-nav-dept="elementaryJr">유년부</a>
+      <a href="department.html?dept=elementary" data-nav-dept="elementary">초등부</a>
+      <a href="department.html?dept=youth" data-nav-dept="youth">중고등부</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="directory-hero">
+      <div class="directory-hero-copy">
+        <a class="back-link" href="index.html">← 모든 부서 보기</a>
+        <p class="eyebrow" id="departmentEnglish">AMICUS PRESCHOOL</p>
+        <h1 id="departmentName">유아-유치부</h1>
+        <p id="departmentMessage">만 2세부터 4세까지 함께 예배합니다.</p>
+        <dl class="directory-counts" aria-label="등록 현황">
+          <div><dt>학생</dt><dd id="studentCount">0</dd></div>
+          <div><dt>간사</dt><dd id="staffCount">0</dd></div>
+        </dl>
+      </div>
+      <figure class="directory-hero-visual" id="departmentVisual">
+        <img src="assets/department-paths-2026.png" alt="부서의 여정을 상징하는 정물 이미지" id="departmentImage">
+      </figure>
+    </section>
+
+    <section class="department-ministry" aria-labelledby="ministryTitle">
+      <div class="ministry-heading">
+        <h2 id="ministryTitle">이 부서를 섬기는 사람들</h2>
+        <p id="departmentIntroduction"></p>
+        <span class="ministry-sample-note">각 부서 담당자의 소개와 공식 기도제목입니다.</span>
+      </div>
+
+      <div class="ministry-layout">
+        <div class="serving-team" aria-labelledby="servingTeamTitle">
+          <h3 id="servingTeamTitle">섬기는 간사</h3>
+          <div class="serving-team-list" id="servingTeamList"></div>
+        </div>
+
+        <aside class="department-prayer-panel" aria-labelledby="departmentPrayerTitle">
+          <h3 id="departmentPrayerTitle">이번 학기 부서 기도제목</h3>
+          <ol id="departmentPrayerList"></ol>
+        </aside>
+      </div>
+    </section>
+
+    <section class="directory-content" aria-labelledby="directoryTitle">
+      <div class="directory-toolbar">
+        <div>
+          <h2 id="directoryTitle">기도로 만나는 사람들</h2>
+          <p>카드를 누르면 기도제목을 더 크게 볼 수 있습니다.</p>
+        </div>
+        <div class="sample-label">기도동행 명단</div>
+      </div>
+
+      <div class="controls" aria-label="명단 검색과 필터">
+        <div class="search-field">
+          <label for="searchInput">이름 또는 학교 검색</label>
+          <input id="searchInput" type="search" placeholder="예: 박서윤, 은혜초등학교" autocomplete="off">
+        </div>
+        <div class="role-filter" role="group" aria-label="역할 선택">
+          <button type="button" class="filter-button is-active" data-role="student" aria-pressed="true">학생</button>
+          <button type="button" class="filter-button" data-role="staff" aria-pressed="false">간사</button>
+        </div>
+      </div>
+
+      <div class="results-meta" aria-live="polite">
+        <span id="resultCount">0명을 보여드리고 있습니다.</span>
+        <button type="button" class="clear-button" id="clearSearch" hidden>검색 지우기</button>
+      </div>
+
+      <div class="people-grid" id="peopleGrid" aria-busy="true">
+        <div class="skeleton-card" aria-hidden="true"></div>
+        <div class="skeleton-card" aria-hidden="true"></div>
+        <div class="skeleton-card" aria-hidden="true"></div>
+        <div class="skeleton-card" aria-hidden="true"></div>
+      </div>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <h3>검색 결과가 없습니다.</h3>
+        <p>이름이나 학교를 다르게 입력해 보세요.</p>
+        <button type="button" id="emptyClear">전체 명단 보기</button>
+      </div>
+
+      <div class="error-state" id="errorState" hidden role="alert">
+        <h3>명단을 불러오지 못했습니다.</h3>
+        <p>잠시 후 다시 시도해 주세요.</p>
+        <button type="button" id="retryButton">다시 불러오기</button>
+      </div>
+    </section>
+
+    <section class="directory-privacy">
+      <span>PARTNER CARE</span>
+      <p>기도제목은 기도를 위한 목적으로만 사용해 주세요. 학생의 개인정보를 캡처하거나 외부에 공유하지 않습니다.</p>
+    </section>
+  </main>
+
+  <dialog class="person-dialog" id="personDialog" aria-labelledby="dialogName">
+    <button type="button" class="dialog-close" id="dialogClose" aria-label="상세 창 닫기">닫기</button>
+    <div class="dialog-heading">
+      <span class="avatar avatar-large" id="dialogAvatar" aria-hidden="true"></span>
+      <div>
+        <p id="dialogRole"></p>
+        <h2 id="dialogName"></h2>
+        <span id="dialogMeta"></span>
+      </div>
+    </div>
+    <div class="dialog-prayer">
+      <span>함께 기도해 주세요</span>
+      <p id="dialogPrayer"></p>
+    </div>
+    <p class="dialog-reminder">한 번 더 이름을 불러 기도해 주세요.</p>
+  </dialog>
+
+  <footer class="site-footer compact-footer">
+    <strong>AMICUS NEXT CHURCH</strong>
+    <p>Prayer Partners 기도 디렉터리</p>
+  </footer>
+
+  <script src="data.js?v=22"></script>
+  <script src="directory.js?v=8"></script>
+</body>
+</html>
