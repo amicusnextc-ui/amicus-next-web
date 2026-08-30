@@ -16,6 +16,12 @@ rather than the ones in this folder.
 | Framework preset | Other (none) |
 | Connected repository | `amicusnextc-ui/amicus-next-web` |
 
+Until Aug 2026 this project had no Git connection and every production
+deployment was a `vercel deploy` run by hand from inside this directory, which
+is why Root Directory had never been set. It is set now and deployments come
+from Git. Do not go back to deploying this directory by hand — a CLI deploy and
+a Git deploy will fight over which one is live.
+
 ## Environment variables
 
 Set these for **Production _and_ Preview**. Preview is easy to miss, and
