@@ -6,6 +6,10 @@
 //
 //   기도 기록 — anonymous prayer counts per person, bumped by record-prayer.
 //
+//   기도 참여 기록 — one row per named prayer check-in. Only written when the
+//   device holds a verified partner application, so leaders can see who is
+//   praying along; everyone else stays in the anonymous tally above.
+//
 // Everything here is best-effort: the site must keep working when Notion is
 // unconfigured, slow, or down. Readers return null on failure so callers can
 // fall back; writers swallow errors after logging.
@@ -13,6 +17,7 @@
 const NOTION_VERSION = "2022-06-28";
 const APPLICATIONS_DB = process.env.NOTION_APPLICATIONS_DB || "37018bf4e2574ddcb44b74cf57ff5109";
 const PRAYER_LOG_DB = process.env.NOTION_PRAYER_LOG_DB || "82d7e115616440a791e6939175c148a2";
+const PARTICIPATION_DB = process.env.NOTION_PRAYER_PARTICIPATION_DB || "83cab992907747ffa654bac05996ff42";
 
 const PREFERENCE_LABELS = {
   any: "전체 부서",
@@ -179,6 +184,51 @@ export async function bumpPrayerCount({ key, name, departmentKey, role, delta })
     return { recorded: true, count: initial };
   } catch (error) {
     console.error("Notion prayer count failed", { name: error?.name, status: error?.status });
+    return { recorded: false, reason: "write_failed" };
+  }
+}
+
+// Named prayer check-in, one row per prayed day. `prayed: false` (the person
+// un-checking today's record) archives the matching row again so the log
+// mirrors what the partner actually reported.
+export async function recordPrayerParticipation({ partnerName, applicationId, key, targetName, departmentKey, role, prayed }) {
+  if (!notionIsConfigured()) return { recorded: false, reason: "not_configured" };
+  try {
+    const todayStamp = new Date().toISOString().slice(0, 10);
+
+    if (!prayed) {
+      const data = await notionRequest("POST", `/databases/${PARTICIPATION_DB}/query`, {
+        filter: {
+          and: [
+            { property: "신청 ID", rich_text: { equals: applicationId } },
+            { property: "키", rich_text: { equals: key } },
+            { property: "날짜", date: { on_or_after: todayStamp } }
+          ]
+        },
+        page_size: 1
+      }, 6_000);
+      const existing = data.results?.[0];
+      if (existing) {
+        await notionRequest("PATCH", `/pages/${existing.id}`, { archived: true }, 6_000);
+      }
+      return { recorded: true };
+    }
+
+    await notionRequest("POST", "/pages", {
+      parent: { database_id: PARTICIPATION_DB },
+      properties: {
+        "기도자": title(partnerName),
+        "대상": text(targetName),
+        "부서": { select: { name: DEPARTMENT_LABELS[departmentKey] || "유아-유치부" } },
+        "역할": { select: { name: role === "staff" ? "간사" : "학생" } },
+        "날짜": { date: { start: new Date().toISOString() } },
+        "신청 ID": text(applicationId),
+        "키": text(key)
+      }
+    }, 6_000);
+    return { recorded: true };
+  } catch (error) {
+    console.error("Notion prayer participation failed", { name: error?.name, status: error?.status });
     return { recorded: false, reason: "write_failed" };
   }
 }

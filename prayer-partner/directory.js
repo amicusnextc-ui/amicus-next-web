@@ -18,12 +18,31 @@ const personDialog = document.querySelector("#personDialog");
 const storageKeys = window.AMICUS_STORAGE;
 const PRAYER_LOG_KEY = "amicus-prayer-log-v1";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+// Semester weeks run Sunday to Saturday from the fall kickoff. Dates before
+// this render as empty bars instead of pretending there was a "last month".
+const SEMESTER_START = new Date("2026-08-30T00:00:00");
 
 let currentRole = "student";
 let loadingTimer;
 let openPersonId = null;
 let serverStudentCounts = null;
 let prayerAggregationOn = false;
+let namedRecordingOn = false;
+
+// The verified application this browser holds, if any — written by
+// partner.html after email verification. Lets the prayer button report
+// "who prayed" instead of an anonymous tick.
+function currentPartner() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKeys.currentAssignment) || "null");
+    if (stored && typeof stored === "object" && stored.name && stored.id) {
+      return { name: String(stored.name).slice(0, 40), applicationId: String(stored.id) };
+    }
+  } catch {
+    // Fall through to anonymous reporting.
+  }
+  return null;
+}
 
 function initials(name) {
   return [...koreanName(name)].slice(-2).join("");
@@ -92,17 +111,25 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Four buckets, oldest first; index 3 is the current week.
+// Which semester week (0-based) a date falls in. Negative means before the
+// semester started.
+function semesterWeekOf(date) {
+  return Math.floor((date.getTime() - SEMESTER_START.getTime()) / WEEK_MS);
+}
+
+// Four buckets, oldest first; index 3 is the current semester week. Bucket
+// weeks that precede the semester are marked null so they render as blank.
 function weeklyCounts(dates) {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
-  const buckets = [0, 0, 0, 0];
+  const currentWeek = Math.max(0, semesterWeekOf(startOfToday));
+  const buckets = [0, 1, 2, 3].map((index) => (currentWeek - (3 - index) < 0 ? null : 0));
   dates.forEach((date) => {
-    const age = startOfToday.getTime() - new Date(`${date}T00:00:00`).getTime();
-    const weeksAgo = Math.floor(age / WEEK_MS);
-    if (weeksAgo >= 0 && weeksAgo < 4) buckets[3 - weeksAgo] += 1;
+    const week = semesterWeekOf(new Date(`${date}T00:00:00`));
+    const index = 3 - (currentWeek - week);
+    if (week >= 0 && index >= 0 && index <= 3 && buckets[index] !== null) buckets[index] += 1;
   });
-  return buckets;
+  return { buckets, currentWeek };
 }
 
 function normalize(value) {
@@ -242,25 +269,32 @@ function clearQuery() {
 function renderPrayerRecord() {
   const log = readPrayerLog();
   const dates = openPersonId ? log[openPersonId] || [] : [];
-  const counts = weeklyCounts(dates);
-  const peak = Math.max(1, ...counts);
+  const { buckets, currentWeek } = weeklyCounts(dates);
+  const peak = Math.max(1, ...buckets.map((count) => count || 0));
   const bars = [...document.querySelectorAll("#dialogRecordBars i")];
 
   bars.forEach((bar, index) => {
-    bar.style.height = `${Math.max(8, Math.round((counts[index] / peak) * 100))}%`;
+    const count = buckets[index];
+    bar.style.height = count === null ? "8%" : `${Math.max(8, Math.round((count / peak) * 100))}%`;
+    bar.style.opacity = count === null ? "0.25" : "";
     bar.parentElement.dataset.current = index === 3 ? "true" : "false";
   });
 
-  const thisWeek = counts[3];
+  const label = document.querySelector(".dialog-record-label");
+  if (label) label.textContent = `학기 ${currentWeek + 1}주차`;
+
+  const thisWeek = buckets[3] || 0;
   const prayedToday = dates.includes(today());
   document.querySelector("#dialogRecordCount").textContent = `이번 주 ${thisWeek}회`;
   const button = document.querySelector("#dialogPray");
   button.textContent = prayedToday ? "오늘 기도했습니다 ✓" : "오늘 기도 기록하기";
   button.dataset.prayed = prayedToday ? "true" : "false";
+  renderReminderCopy();
 }
 
 function reportPrayer(key, prayed) {
   const role = key.split(":")[1];
+  const partner = currentPartner();
   fetch("/api/record-prayer", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -269,13 +303,17 @@ function reportPrayer(key, prayed) {
       prayed,
       // Students are resolved server-side from the roster; only staff, who
       // exist solely in this page's data, send a display name.
-      name: role === "staff" ? document.querySelector("#dialogName").textContent.trim() : ""
+      name: role === "staff" ? document.querySelector("#dialogName").textContent.trim() : "",
+      // A verified partner on this device signs the record so the ministry
+      // can see who is praying along; visitors stay anonymous.
+      ...(partner ? { partner } : {})
     })
-  }).then((response) => {
-    if (response.ok && !prayerAggregationOn) {
-      prayerAggregationOn = true;
-      renderReminderCopy();
-    }
+  }).then(async (response) => {
+    if (!response.ok) return;
+    const data = await response.json().catch(() => ({}));
+    prayerAggregationOn = true;
+    if (data.named) namedRecordingOn = true;
+    renderReminderCopy();
   }).catch(() => {
     // Aggregation is a bonus; the local record above already succeeded.
   });
@@ -284,6 +322,11 @@ function reportPrayer(key, prayed) {
 function renderReminderCopy() {
   const reminder = document.querySelector(".dialog-reminder");
   if (!reminder) return;
+  const partner = currentPartner();
+  if (partner && (namedRecordingOn || !prayerAggregationOn)) {
+    reminder.textContent = `기도 기록은 이 기기에 저장되고, ${partner.name}님의 이름으로 교육부 기도 참여 기록에도 함께 남습니다. 화면 캡처와 외부 공유는 하지 말아 주세요.`;
+    return;
+  }
   reminder.textContent = prayerAggregationOn
     ? "기도 기록은 이 기기에 저장되며, 간사에게는 익명 횟수만 전달됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요."
     : "기도 기록은 이 기기에만 저장됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요.";
