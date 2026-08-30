@@ -671,7 +671,28 @@ function restorePendingVerification() {
 }
 
 document.querySelector("#printPrayerCard").addEventListener("click", () => window.print());
-document.querySelector("#showApplicationAgain").addEventListener("click", () => {
+// Releasing is device-local: it forgets the saved card so the applicant (or the
+// next person on a shared phone) can apply again. The emailed PDF and the
+// ministry's own record are untouched — the copy says so. The confirm panel is
+// built here rather than in the markup so the whole feature ships in one file.
+const releaseButton = document.querySelector("#showApplicationAgain");
+releaseButton.textContent = "이 기기에서 연결 해제하기";
+
+const releaseConfirm = document.createElement("div");
+releaseConfirm.hidden = true;
+releaseConfirm.style.cssText =
+  "width:min(100%,460px);margin:14px auto 0;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#fffdf8;text-align:center";
+releaseConfirm.innerHTML =
+  '<p style="margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6">' +
+  '이 기기에 저장된 <strong id="releaseStudentName" style="color:var(--dark)"></strong> 학생 기도카드가 지워지고 신청 화면으로 돌아갑니다. ' +
+  "이메일로 받은 PDF와 교회에 접수된 신청 기록은 그대로 남습니다.</p>" +
+  '<div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">' +
+  '<button type="button" id="confirmRelease" style="min-height:42px;padding:0 20px;border:0;border-radius:999px;background:var(--matched-accent,var(--rust));color:#fffdf8;font-size:13px;font-weight:900;cursor:pointer">연결 해제</button>' +
+  '<button type="button" id="cancelRelease" style="min-height:42px;padding:0 20px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--dark);font-size:13px;font-weight:900;cursor:pointer">취소</button>' +
+  "</div>";
+releaseButton.insertAdjacentElement("afterend", releaseConfirm);
+
+function showApplicationForm() {
   writePendingVerification(null);
   resultView.hidden = true;
   emailVerificationView.hidden = true;
@@ -681,6 +702,52 @@ document.querySelector("#showApplicationAgain").addEventListener("click", () => 
   renderAvailability(readApplications());
   window.scrollTo({ top: 0, behavior: "instant" });
   document.querySelector("#partnerName").focus();
+}
+
+function releaseSavedAssignment() {
+  let released = null;
+  try {
+    released = JSON.parse(localStorage.getItem(storageKeys.currentAssignment) || "null");
+  } catch {
+    // A corrupt value still needs clearing.
+  }
+  localStorage.removeItem(storageKeys.currentAssignment);
+  if (released) {
+    writeApplications(
+      readApplications().filter((item) => item.id !== released.id && item.email !== released.email)
+    );
+  }
+}
+
+releaseButton.addEventListener("click", () => {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(storageKeys.currentAssignment) || "null");
+  } catch {
+    saved = null;
+  }
+  // Nothing stored (or unreadable) — go straight back to the form.
+  if (!saved) {
+    showApplicationForm();
+    return;
+  }
+  const student = directory[saved.departmentKey]?.students.find((person) => person.id === saved.studentId);
+  releaseConfirm.querySelector("#releaseStudentName").textContent = student
+    ? student.name.split(" (")[0]
+    : "매칭된";
+  releaseConfirm.hidden = false;
+  releaseConfirm.querySelector("#confirmRelease").focus();
+});
+
+releaseConfirm.querySelector("#cancelRelease").addEventListener("click", () => {
+  releaseConfirm.hidden = true;
+  releaseButton.focus();
+});
+
+releaseConfirm.querySelector("#confirmRelease").addEventListener("click", () => {
+  releaseSavedAssignment();
+  releaseConfirm.hidden = true;
+  showApplicationForm();
 });
 
 partnerForm.addEventListener("input", (event) => {
