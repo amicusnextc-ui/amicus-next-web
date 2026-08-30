@@ -73,6 +73,20 @@ function initials(name) {
   return [...primaryName].slice(-2).join("");
 }
 
+// data.js records unknown values as prose ("학교 정보 없음", "학년 정보 확인 필요").
+// Those are notes to the editor, not something to show a partner.
+function realValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/정보\s*(없음|확인\s*필요)/.test(text)) return "";
+  if (text === "없음") return "";
+  return text;
+}
+
+function schoolAndGrade(student) {
+  return [realValue(student.school), realValue(student.grade)].filter(Boolean).join(" / ");
+}
+
 function stableHash(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
@@ -471,9 +485,11 @@ function renderResult(application, announce = false) {
   document.querySelector("#resultDepartment").textContent = `${department.name} / ${pickupCode}`;
   document.querySelector("#resultAvatar").textContent = initials(student.name);
   document.querySelector("#resultCardName").textContent = student.name;
-  document.querySelector("#resultSchool").textContent = student.school;
-  document.querySelector("#resultGrade").textContent = student.grade;
-  document.querySelector("#resultPrayer").textContent = student.prayer;
+  const schoolLine = schoolAndGrade(student);
+  document.querySelector("#resultSchoolGrade").textContent = schoolLine;
+  document.querySelector("#resultSchoolField").hidden = !schoolLine;
+  document.querySelector("#resultPrayer").textContent =
+    realValue(student.prayer) || "이번 학기 기도제목이 아직 등록되지 않았습니다. 이름을 불러 기도해 주세요.";
   document.querySelector("#resultPickupCode").textContent = pickupCode;
   renderEmailDelivery(application);
 

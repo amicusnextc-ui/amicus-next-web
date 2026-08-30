@@ -2975,6 +2975,7 @@ button:active,
   font-size: clamp(38px, 4.2vw, 50px);
   line-height: 1.15;
   letter-spacing: -0.065em;
+  word-break: keep-all;
 }
 
 .result-message h1 span {
@@ -3088,6 +3089,12 @@ button:active,
 
 .assigned-identity-fields {
   width: 58%;
+}
+
+/* .assigned-field sets display, which would beat the hidden attribute's
+   UA rule, so state it explicitly. */
+.assigned-field[hidden] {
+  display: none;
 }
 
 .assigned-field {

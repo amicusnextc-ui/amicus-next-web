@@ -1,3 +1,18 @@
+// data.js records unknown values as prose ("학교 정보 없음", "학년 정보 확인 필요").
+// Those are notes to the editor and must never reach a reader.
+export function realValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/정보\s*(없음|확인\s*필요)/.test(text)) return "";
+  if (text === "없음") return "";
+  return text;
+}
+
+// "학교 / 학년" with whichever halves actually exist; empty when neither does.
+export function schoolAndGrade(student, separator = " / ") {
+  return [realValue(student.school), realValue(student.grade)].filter(Boolean).join(separator);
+}
+
 import { createHash } from "node:crypto";
 
 export const prayerDepartments = {
