@@ -27,16 +27,23 @@ a Git deploy will fight over which one is live.
 Set these for **Production _and_ Preview**. Preview is easy to miss, and
 without it no preview deployment can exercise email at all.
 
+Mail goes out through `api/_mail.js`: **Resend when `RESEND_API_KEY` is set**
+(the same provider, key and verified `amicuschurch.com` domain the
+amicus-checkin project already uses — copy the value from that project's
+environment variables), otherwise Mailtrap. With neither, the API returns
+`email_not_configured` (503) and the form falls back to a local, unsent match.
+
 | Variable | Required | Notes |
 |---|---|---|
-| `MAILTRAP_API_KEY` | yes | Missing → the API returns `email_not_configured` (503) and the form falls back to a local, unsent match |
-| `MAIL_FROM_EMAIL` | yes | Sender address |
+| `RESEND_API_KEY` | one of the two | Same key as the amicus-checkin project; sends from `noreply@amicuschurch.com` by default |
 | `EMAIL_SIGNING_SECRET` | yes | **32+ characters.** Signs the verification token. Generate with `openssl rand -hex 32` |
+| `MAIL_FROM_EMAIL` | Mailtrap only | Optional under Resend (defaults to `noreply@amicuschurch.com`; must be on a domain Resend has verified) |
 | `MAIL_FROM_NAME` | no | Defaults to `AMICUS NEXT CHURCH` |
 | `MAIL_REPLY_TO` | no | Sets `reply_to` |
 | `PARTNER_EVENT_CODE` | no | Defaults to `AMICUS26`; must match the code on the printed sign |
 | `ALLOWED_ORIGINS` | no | Comma-separated extra origins |
-| `MAILTRAP_USE_SANDBOX` | no | `true` routes to the Mailtrap sandbox — **use this on Preview** so test submissions never reach real addresses |
+| `MAILTRAP_API_KEY` | one of the two | Fallback provider, used only when `RESEND_API_KEY` is absent |
+| `MAILTRAP_USE_SANDBOX` | no | `true` routes Mailtrap to its sandbox; requires `MAILTRAP_INBOX_ID` |
 | `MAILTRAP_INBOX_ID` | if sandbox | Required when `MAILTRAP_USE_SANDBOX=true` |
 | `NOTION_API_KEY` | for records | Internal-integration secret; see **Records in Notion** below |
 | `NOTION_APPLICATIONS_DB` | no | Overrides the 신청 database id (default baked in) |

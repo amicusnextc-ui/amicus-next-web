@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { escapeHtml, isAllowedOrigin, jsonResponse, readJsonBody, validateSignedAssignment } from "./_http.js";
-import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
+import { mailIsConfigured, sendMail } from "./_mail.js";
 import { createPrayerCardPdf } from "./_pdf.js";
 import { findPrayerStudent, pickupCodeForStudent, schoolAndGrade } from "./_students.js";
 import { verifyChallenge } from "./_verification.js";
@@ -53,7 +53,7 @@ export default {
     }
 
     try {
-      if (!mailtrapIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
+      if (!mailIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
         return jsonResponse({ error: "이메일 발송 설정이 아직 완료되지 않았습니다.", code: "email_not_configured" }, 503);
       }
 
@@ -95,7 +95,7 @@ export default {
         student,
         pickupCode
       });
-      const delivery = await sendMailtrap({
+      const delivery = await sendMail({
         to: [{ email: application.email, name: application.partnerName }],
         subject: `[AMICUS NEXT] ${student.name} 학생 기도동행 카드`,
         text: prayerCardText({ partnerName: application.partnerName, department, student, pickupCode }),

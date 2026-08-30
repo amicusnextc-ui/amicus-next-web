@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { isAllowedOrigin, jsonResponse, readJsonBody, escapeHtml, validateVerificationRequest } from "./_http.js";
-import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
+import { mailIsConfigured, sendMail } from "./_mail.js";
 import { selectPrayerStudent } from "./_students.js";
 import { createVerificationChallenge } from "./_verification.js";
 import { listAssignedCounts } from "./_notion.js";
@@ -38,7 +38,7 @@ export default {
       const body = await readJsonBody(request);
       const application = validateVerificationRequest(body);
       if (!application) return jsonResponse({ error: "신청 정보를 확인해 주세요.", code: "invalid_application" }, 400);
-      if (!mailtrapIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
+      if (!mailIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
         return jsonResponse({ error: "이메일 발송 설정이 아직 완료되지 않았습니다.", code: "email_not_configured" }, 503);
       }
 
@@ -65,7 +65,7 @@ export default {
         departmentKey: assignment.departmentKey,
         studentId: assignment.student.id
       });
-      const delivery = await sendMailtrap({
+      const delivery = await sendMail({
         to: [{ email: application.email, name: application.partnerName }],
         subject: "[AMICUS NEXT] 기도동행 이메일 인증코드",
         text: `${application.partnerName}님의 이메일 인증코드는 ${challenge.code}입니다. 신청 화면에 입력하면 매칭된 학생의 기도카드 PDF가 발송됩니다. 인증코드는 10분 동안 사용할 수 있습니다.`,
