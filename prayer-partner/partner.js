@@ -46,6 +46,7 @@ const rhythmLabels = {
 let pendingVerification = null;
 let currentStep = 1;
 let matchingClosed = false;
+let serverAvailability = null;
 
 const availabilityElements = {
   any: document.querySelector("#availabilityAny"),
@@ -113,12 +114,21 @@ function availableStudents(preference, applications) {
 }
 
 function renderAvailability(applications) {
-  const availableByDepartment = Object.fromEntries(
-    Object.keys(directory).map((departmentKey) => [
-      departmentKey,
-      availableStudents(departmentKey, applications).length
-    ])
-  );
+  // The shared record is authoritative when reachable; otherwise fall back to
+  // what this browser knows about its own applications.
+  const availableByDepartment = serverAvailability
+    ? Object.fromEntries(
+        Object.keys(directory).map((departmentKey) => [
+          departmentKey,
+          serverAvailability.departments?.[departmentKey] ?? 0
+        ])
+      )
+    : Object.fromEntries(
+        Object.keys(directory).map((departmentKey) => [
+          departmentKey,
+          availableStudents(departmentKey, applications).length
+        ])
+      );
   const totalAvailable = Object.values(availableByDepartment).reduce((sum, count) => sum + count, 0);
   const counts = { any: totalAvailable, ...availableByDepartment };
 
@@ -707,6 +717,13 @@ function prepareEventCode() {
 
 prepareEventCode();
 renderAvailability(readApplications());
+
+window.AMICUS_AVAILABILITY?.then((availability) => {
+  if (availability && availability.departments) {
+    serverAvailability = availability;
+    renderAvailability(readApplications());
+  }
+});
 
 if (!restorePendingVerification()) {
   try {

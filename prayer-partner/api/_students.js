@@ -108,7 +108,13 @@ export function pickupCodeForStudent(department, student) {
   return `${department.code}-${String(index + 1).padStart(2, "0")}`;
 }
 
-export function selectPrayerStudent(departmentPreference, email, partnerName) {
+// assignedCounts (studentId -> partners so far) comes from the Notion record
+// of verified applications. When it is known, students without a partner are
+// matched first and a department closes once everyone in it has one — which is
+// what the form has promised all along. When the store is unreachable
+// (null/undefined) the old deterministic hash over everyone still applies, so
+// an outage never blocks an application.
+export function selectPrayerStudent(departmentPreference, email, partnerName, assignedCounts) {
   const eligible = departmentPreference === "any"
     ? Object.entries(prayerDepartments).flatMap(([departmentKey, department]) =>
         department.students.map((student) => ({ departmentKey, department, student }))
@@ -119,7 +125,11 @@ export function selectPrayerStudent(departmentPreference, email, partnerName) {
         student
       }));
 
-  if (eligible.length === 0) return null;
+  const pool = assignedCounts
+    ? eligible.filter(({ student }) => !(assignedCounts[student.id] > 0))
+    : eligible;
+
+  if (pool.length === 0) return null;
   const digest = createHash("sha256").update(`${email}:${partnerName}`).digest();
-  return eligible[digest.readUInt32BE(0) % eligible.length];
+  return pool[digest.readUInt32BE(0) % pool.length];
 }

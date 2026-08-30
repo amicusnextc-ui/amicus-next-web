@@ -22,6 +22,8 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 let currentRole = "student";
 let loadingTimer;
 let openPersonId = null;
+let serverStudentCounts = null;
+let prayerAggregationOn = false;
 
 function initials(name) {
   return [...koreanName(name)].slice(-2).join("");
@@ -188,7 +190,7 @@ function renderPeople() {
     const people = department[currentRole === "student" ? "students" : "staff"];
     const filtered = people.filter((person) => personMatches(person, query));
 
-    const counts = partnerCounts();
+    const counts = serverStudentCounts || partnerCounts();
     grid.innerHTML = filtered.map((person, index) => cardMarkup(person, index, counts)).join("");
     grid.hidden = filtered.length === 0;
     grid.setAttribute("aria-busy", "false");
@@ -257,16 +259,48 @@ function renderPrayerRecord() {
   button.dataset.prayed = prayedToday ? "true" : "false";
 }
 
+function reportPrayer(key, prayed) {
+  const role = key.split(":")[1];
+  fetch("/api/record-prayer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      key,
+      prayed,
+      // Students are resolved server-side from the roster; only staff, who
+      // exist solely in this page's data, send a display name.
+      name: role === "staff" ? document.querySelector("#dialogName").textContent.trim() : ""
+    })
+  }).then((response) => {
+    if (response.ok && !prayerAggregationOn) {
+      prayerAggregationOn = true;
+      renderReminderCopy();
+    }
+  }).catch(() => {
+    // Aggregation is a bonus; the local record above already succeeded.
+  });
+}
+
+function renderReminderCopy() {
+  const reminder = document.querySelector(".dialog-reminder");
+  if (!reminder) return;
+  reminder.textContent = prayerAggregationOn
+    ? "기도 기록은 이 기기에 저장되며, 간사에게는 익명 횟수만 전달됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요."
+    : "기도 기록은 이 기기에만 저장됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요.";
+}
+
 function togglePrayedToday() {
   if (!openPersonId) return;
   const log = readPrayerLog();
   const dates = log[openPersonId] || [];
   const stamp = today();
-  log[openPersonId] = dates.includes(stamp)
-    ? dates.filter((date) => date !== stamp)
-    : [...dates, stamp];
+  const prayedNow = !dates.includes(stamp);
+  log[openPersonId] = prayedNow
+    ? [...dates, stamp]
+    : dates.filter((date) => date !== stamp);
   writePrayerLog(log);
   renderPrayerRecord();
+  reportPrayer(openPersonId, prayedNow);
 }
 
 function openPerson(person) {
@@ -323,3 +357,10 @@ personDialog.addEventListener("click", (event) => {
 
 applyDepartment();
 window.setTimeout(renderPeople, 320);
+
+window.AMICUS_AVAILABILITY?.then((availability) => {
+  if (availability && availability.students) {
+    serverStudentCounts = availability.students;
+    scheduleRender();
+  }
+});

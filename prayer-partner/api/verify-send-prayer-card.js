@@ -4,6 +4,7 @@ import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
 import { createPrayerCardPdf } from "./_pdf.js";
 import { findPrayerStudent, pickupCodeForStudent, schoolAndGrade } from "./_students.js";
 import { verifyChallenge } from "./_verification.js";
+import { recordApplication } from "./_notion.js";
 
 const attemptsByToken = globalThis.__amicusCodeAttempts || new Map();
 const sendsByToken = globalThis.__amicusPdfSends || new Map();
@@ -116,6 +117,11 @@ export default {
 
       sendsByToken.set(tokenKey, Date.now());
       attemptsByToken.delete(tokenKey);
+
+      // The durable record of this application. recordApplication never
+      // throws; a Notion outage costs the row, not the applicant's card.
+      await recordApplication({ application, department, student, pickupCode, emailSent: true });
+
       return jsonResponse({
         sent: true,
         filename: "amicus-prayer-card.pdf",

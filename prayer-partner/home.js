@@ -26,7 +26,14 @@ function readAssignment() {
 }
 
 // Students with no partner yet — the same figure partner.html gates on.
+let serverAvailability = null;
+
 function waitingByDepartment() {
+  if (serverAvailability) {
+    return Object.fromEntries(
+      Object.keys(directory).map((key) => [key, serverAvailability.departments?.[key] ?? 0])
+    );
+  }
   const assigned = new Set(readApplications().map((application) => application.studentId));
   return Object.fromEntries(
     Object.entries(directory).map(([key, department]) => [
@@ -85,3 +92,10 @@ function render() {
 }
 
 render();
+
+window.AMICUS_AVAILABILITY?.then((availability) => {
+  if (availability && availability.departments) {
+    serverAvailability = availability;
+    render();
+  }
+});

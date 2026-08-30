@@ -3,6 +3,7 @@ import { isAllowedOrigin, jsonResponse, readJsonBody, escapeHtml, validateVerifi
 import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
 import { selectPrayerStudent } from "./_students.js";
 import { createVerificationChallenge } from "./_verification.js";
+import { listAssignedCounts } from "./_notion.js";
 
 const REQUEST_COOLDOWN_MS = 60_000;
 const recentRequests = globalThis.__amicusVerificationRequests || new Map();
@@ -48,13 +49,15 @@ export default {
       }
       recentRequests.set(requestKey, Date.now());
 
+      const assignedCounts = await listAssignedCounts();
       const assignment = selectPrayerStudent(
         application.departmentPreference,
         application.email,
-        application.partnerName
+        application.partnerName,
+        assignedCounts
       );
       if (!assignment) {
-        return jsonResponse({ error: "선택한 부서에서 연결할 학생을 찾지 못했습니다.", code: "department_unavailable" }, 409);
+        return jsonResponse({ error: "선택한 부서의 모든 학생이 이미 연결되었습니다.", code: "department_unavailable" }, 409);
       }
 
       const challenge = createVerificationChallenge({
