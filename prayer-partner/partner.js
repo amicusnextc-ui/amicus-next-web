@@ -11,7 +11,41 @@ const verificationForm = document.querySelector("#verificationForm");
 const verificationCode = document.querySelector("#verificationCode");
 const verifyEmail = document.querySelector("#verifyEmail");
 
+const applyBack = document.querySelector("#applyBack");
+const applyHint = document.querySelector("#applyHint");
+const applyStepLabel = document.querySelector("#applyStepLabel");
+const applyBars = Array.from(document.querySelectorAll(".apply-bars li"));
+const applySteps = Array.from(document.querySelectorAll(".apply-step"));
+const waitingList = document.querySelector("#waitingList");
+const waitingTotal = document.querySelector("#waitingTotal");
+
+const TOTAL_STEPS = 3;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const stepCopy = {
+  1: {
+    title: "기도 파트너가 되어 주세요.",
+    lede: "매주 학생의 이름을 불러 기도하고, 기도제목은 외부에 공유하지 않기로 약속해 주세요."
+  },
+  2: {
+    title: "어느 부서의 학생과 함께하시겠어요?",
+    lede: "특별히 마음에 있는 부서가 없다면 전체 부서를 선택해 주세요. 가장 필요한 학생과 연결됩니다."
+  },
+  3: {
+    title: "마지막으로 약속을 확인해 주세요.",
+    lede: "아래 내용이 맞는지 확인하고 기도 약속에 동의해 주세요."
+  }
+};
+
+const rhythmLabels = {
+  daily: "매일 짧게라도 기도하겠습니다.",
+  "three-times": "주 3회 기도하겠습니다.",
+  weekly: "매주 한 번 이름을 불러 기도하겠습니다."
+};
+
 let pendingVerification = null;
+let currentStep = 1;
+let matchingClosed = false;
 
 const availabilityElements = {
   any: document.querySelector("#availabilityAny"),
@@ -81,7 +115,7 @@ function renderAvailability(applications) {
     const isFull = count === 0;
     input.disabled = isFull;
     label.dataset.full = isFull ? "true" : "false";
-    availabilityElements[value].textContent = isFull ? "마감" : "신청 가능";
+    availabilityElements[value].textContent = isFull ? "마감" : `${count}명 대기`;
   });
 
   const selected = partnerForm.querySelector('input[name="departmentPreference"]:checked');
@@ -94,8 +128,123 @@ function renderAvailability(applications) {
   summary.textContent = totalAvailable === 0
     ? "이번 학기 모든 학생의 기도 파트너가 연결되었습니다."
     : "아직 기도 파트너를 기다리는 학생이 있습니다.";
-  submitPartner.disabled = totalAvailable === 0;
-  submitPartner.textContent = totalAvailable === 0 ? "이번 학기 매칭 마감" : "신청하고 학생 만나기";
+  matchingClosed = totalAvailable === 0;
+
+  waitingTotal.textContent = String(totalAvailable);
+  waitingList.replaceChildren(
+    ...Object.entries(directory).map(([departmentKey, department]) => {
+      const count = availableByDepartment[departmentKey];
+      const row = document.createElement("li");
+      const label = document.createElement("span");
+      const value = document.createElement("b");
+      row.dataset.full = count === 0 ? "true" : "false";
+      label.textContent = department.name;
+      value.textContent = count === 0 ? "마감" : `${count}명`;
+      row.append(label, value);
+      return row;
+    })
+  );
+
+  renderWizard();
+}
+
+function departmentLabel(preference) {
+  if (!preference) return "—";
+  return preference === "any" ? "전체 부서" : directory[preference]?.name || "—";
+}
+
+function currentValues() {
+  const data = new FormData(partnerForm);
+  return {
+    eventCode: String(data.get("eventCode") || "").trim().toUpperCase(),
+    name: String(data.get("partnerName") || "").trim(),
+    email: String(data.get("partnerEmail") || "").trim(),
+    departmentPreference: String(data.get("departmentPreference") || ""),
+    prayerRhythm: String(data.get("prayerRhythm") || ""),
+    consent: data.get("privacyConsent") === "on"
+  };
+}
+
+function stepHint(step, values) {
+  if (step === 1) {
+    if (values.name.length < 2) return "이름을 입력해 주세요.";
+    if (!EMAIL_PATTERN.test(values.email)) return "기도카드를 받을 이메일이 필요합니다.";
+    if (values.eventCode !== eventDetails.applicationCode) return "안내판에 적힌 신청코드를 입력해 주세요.";
+    return "";
+  }
+  if (step === 2) {
+    if (!values.departmentPreference) return "희망 부서를 선택해 주세요.";
+    if (!values.prayerRhythm) return "기도 약속을 선택해 주세요.";
+    return "";
+  }
+  return values.consent ? "" : "기도 약속에 동의해야 신청이 완료됩니다.";
+}
+
+function validateStep(step, values) {
+  if (step === 1) {
+    const errors = [
+      fieldError("partnerName", values.name.length < 2 ? "이름을 두 글자 이상 입력해 주세요." : ""),
+      fieldError("partnerEmail", !EMAIL_PATTERN.test(values.email) ? "올바른 이메일을 입력해 주세요." : ""),
+      fieldError("eventCode", values.eventCode !== eventDetails.applicationCode ? "안내판에 적힌 신청코드를 확인해 주세요." : "")
+    ];
+    return !errors.some(Boolean);
+  }
+  if (step === 2) {
+    const rhythmError = fieldError("prayerRhythm", !values.prayerRhythm ? "기도 약속을 선택해 주세요." : "");
+    return Boolean(values.departmentPreference) && !rhythmError;
+  }
+  return !fieldError("privacyConsent", !values.consent ? "개인정보 보호 약속에 동의해 주세요." : "");
+}
+
+function renderWizard() {
+  const values = currentValues();
+  const hint = stepHint(currentStep, values);
+
+  applySteps.forEach((section) => {
+    section.hidden = Number(section.dataset.step) !== currentStep;
+  });
+  applyBars.forEach((bar) => {
+    bar.dataset.on = Number(bar.dataset.bar) <= currentStep ? "true" : "false";
+  });
+
+  applyStepLabel.textContent = `${currentStep} / ${TOTAL_STEPS} 단계`;
+  document.querySelector("#applicationTitle").textContent = stepCopy[currentStep].title;
+  document.querySelector("#applicationLede").textContent = stepCopy[currentStep].lede;
+
+  document.querySelector("#summaryName").textContent = values.name || "—";
+  document.querySelector("#summaryEmail").textContent = values.email || "—";
+  document.querySelector("#summaryDepartment").textContent = departmentLabel(values.departmentPreference);
+  document.querySelector("#summaryRhythm").textContent = rhythmLabels[values.prayerRhythm] || "—";
+
+  applyBack.hidden = currentStep === 1;
+  submitPartner.disabled = matchingClosed;
+  submitPartner.textContent = matchingClosed
+    ? "이번 학기 매칭 마감"
+    : (currentStep === TOTAL_STEPS ? "신청하고 학생 만나기" : "다음");
+  submitPartner.dataset.blocked = !matchingClosed && hint ? "true" : "false";
+  applyHint.textContent = matchingClosed ? "" : hint;
+}
+
+function focusStep() {
+  const step = partnerForm.querySelector(`.apply-step[data-step="${currentStep}"]`);
+  if (!step) return;
+  const target = step.querySelector("input:checked") || step.querySelector("input");
+  target?.focus();
+}
+
+function focusInvalid(field) {
+  if (!field) return;
+  if (field.id === "prayerRhythm") {
+    field.querySelector("input")?.focus();
+    return;
+  }
+  field.focus();
+}
+
+function goToStep(step) {
+  currentStep = Math.min(TOTAL_STEPS, Math.max(1, step));
+  document.querySelector("#formAlert").hidden = true;
+  renderWizard();
 }
 
 function findStudent(studentId, departmentKey) {
@@ -346,12 +495,28 @@ partnerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formAlert = document.querySelector("#formAlert");
   formAlert.hidden = true;
+  if (matchingClosed) return;
+
+  if (currentStep < TOTAL_STEPS) {
+    if (validateStep(currentStep, currentValues())) {
+      goToStep(currentStep + 1);
+      focusStep();
+    } else {
+      renderWizard();
+      focusInvalid(partnerForm.querySelector(`.apply-step[data-step="${currentStep}"] [aria-invalid="true"]`));
+    }
+    return;
+  }
+
   const result = validateForm(new FormData(partnerForm));
 
   if (!result.valid) {
+    const invalid = partnerForm.querySelector('[aria-invalid="true"]');
+    const owningStep = Number(invalid?.closest(".apply-step")?.dataset.step || currentStep);
+    if (owningStep !== currentStep) goToStep(owningStep);
     formAlert.textContent = "입력하지 않았거나 확인이 필요한 항목이 있습니다.";
     formAlert.hidden = false;
-    partnerForm.querySelector('[aria-invalid="true"]')?.focus();
+    focusInvalid(invalid);
     return;
   }
 
@@ -450,13 +615,15 @@ document.querySelector("#backToApplication").addEventListener("click", () => {
     document.querySelector("#eventCode").value = pendingVerification.eventCode || "";
     document.querySelector("#partnerName").value = pendingVerification.partnerName;
     document.querySelector("#partnerEmail").value = pendingVerification.email;
-    document.querySelector("#prayerRhythm").value = pendingVerification.prayerRhythm;
+    const rhythmInput = partnerForm.querySelector(`input[name="prayerRhythm"][value="${pendingVerification.prayerRhythm}"]`);
+    if (rhythmInput) rhythmInput.checked = true;
     const departmentInput = partnerForm.querySelector(`input[name="departmentPreference"][value="${pendingVerification.departmentPreference}"]`);
     if (departmentInput && !departmentInput.disabled) departmentInput.checked = true;
   }
   writePendingVerification(null);
   emailVerificationView.hidden = true;
   applicationView.hidden = false;
+  goToStep(1);
   window.scrollTo({ top: 0, behavior: "instant" });
   document.querySelector("#partnerEmail").focus();
 });
@@ -484,9 +651,27 @@ document.querySelector("#showApplicationAgain").addEventListener("click", () => 
   emailVerificationView.hidden = true;
   applicationView.hidden = false;
   delete document.body.dataset.matchedDepartment;
+  goToStep(1);
   renderAvailability(readApplications());
   window.scrollTo({ top: 0, behavior: "instant" });
   document.querySelector("#partnerName").focus();
+});
+
+partnerForm.addEventListener("input", (event) => {
+  const target = event.target;
+  if (target.id && document.querySelector(`#${target.id}Error`)) fieldError(target.id, "");
+  renderWizard();
+});
+
+partnerForm.addEventListener("change", (event) => {
+  if (event.target.name === "prayerRhythm") fieldError("prayerRhythm", "");
+  if (event.target.id === "privacyConsent") fieldError("privacyConsent", "");
+  renderWizard();
+});
+
+applyBack.addEventListener("click", () => {
+  goToStep(currentStep - 1);
+  focusStep();
 });
 
 function prepareEventCode() {
