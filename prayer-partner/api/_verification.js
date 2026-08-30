@@ -1,11 +1,27 @@
-import { createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 
 const TOKEN_LIFETIME_MS = 10 * 60 * 1000;
 
+// An explicit EMAIL_SIGNING_SECRET wins. Without one, a key is derived from
+// RESEND_API_KEY — it only signs 10-minute verification tokens, so rotating
+// the Resend key merely voids codes that are already in flight.
 function signingSecret() {
-  const secret = String(process.env.EMAIL_SIGNING_SECRET || "");
-  if (secret.length < 32) throw new Error("EMAIL_SIGNING_SECRET_NOT_CONFIGURED");
-  return secret;
+  const explicit = String(process.env.EMAIL_SIGNING_SECRET || "");
+  if (explicit.length >= 32) return explicit;
+  const resendKey = String(process.env.RESEND_API_KEY || "");
+  if (resendKey) {
+    return createHash("sha256").update(`amicus-prayer-partner-token-signing:${resendKey}`).digest("hex");
+  }
+  throw new Error("EMAIL_SIGNING_SECRET_NOT_CONFIGURED");
+}
+
+export function signingIsConfigured() {
+  try {
+    signingSecret();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function hmac(value) {

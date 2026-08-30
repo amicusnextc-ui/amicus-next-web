@@ -173,3 +173,12 @@ window.AMICUS_EVENT = {
   applicationCode: "AMICUS26",
   applicationUrl: "https://amicus-prayer-partner.vercel.app/partner.html?code=AMICUS26"
 };
+
+// Shared, real waiting numbers from the application record. Resolves to null
+// when the record store is not configured or unreachable — consumers keep
+// their localStorage-derived numbers in that case.
+window.AMICUS_AVAILABILITY = (typeof fetch === "function"
+  ? fetch("/api/availability")
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null)
+  : Promise.resolve(null));

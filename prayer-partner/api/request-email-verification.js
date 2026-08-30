@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import { isAllowedOrigin, jsonResponse, readJsonBody, escapeHtml, validateVerificationRequest } from "./_http.js";
-import { mailtrapIsConfigured, sendMailtrap } from "./_mailtrap.js";
+import { mailIsConfigured, sendMail } from "./_mail.js";
 import { selectPrayerStudent } from "./_students.js";
-import { createVerificationChallenge } from "./_verification.js";
+import { createVerificationChallenge, signingIsConfigured } from "./_verification.js";
+import { listAssignedCounts } from "./_notion.js";
 
 const REQUEST_COOLDOWN_MS = 60_000;
 const recentRequests = globalThis.__amicusVerificationRequests || new Map();
@@ -37,7 +38,7 @@ export default {
       const body = await readJsonBody(request);
       const application = validateVerificationRequest(body);
       if (!application) return jsonResponse({ error: "신청 정보를 확인해 주세요.", code: "invalid_application" }, 400);
-      if (!mailtrapIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
+      if (!mailIsConfigured() || !signingIsConfigured()) {
         return jsonResponse({ error: "이메일 발송 설정이 아직 완료되지 않았습니다.", code: "email_not_configured" }, 503);
       }
 
@@ -48,13 +49,15 @@ export default {
       }
       recentRequests.set(requestKey, Date.now());
 
+      const assignedCounts = await listAssignedCounts();
       const assignment = selectPrayerStudent(
         application.departmentPreference,
         application.email,
-        application.partnerName
+        application.partnerName,
+        assignedCounts
       );
       if (!assignment) {
-        return jsonResponse({ error: "선택한 부서에서 연결할 학생을 찾지 못했습니다.", code: "department_unavailable" }, 409);
+        return jsonResponse({ error: "선택한 부서의 모든 학생이 이미 연결되었습니다.", code: "department_unavailable" }, 409);
       }
 
       const challenge = createVerificationChallenge({
@@ -62,7 +65,7 @@ export default {
         departmentKey: assignment.departmentKey,
         studentId: assignment.student.id
       });
-      const delivery = await sendMailtrap({
+      const delivery = await sendMail({
         to: [{ email: application.email, name: application.partnerName }],
         subject: "[AMICUS NEXT] 기도동행 이메일 인증코드",
         text: `${application.partnerName}님의 이메일 인증코드는 ${challenge.code}입니다. 신청 화면에 입력하면 매칭된 학생의 기도카드 PDF가 발송됩니다. 인증코드는 10분 동안 사용할 수 있습니다.`,
