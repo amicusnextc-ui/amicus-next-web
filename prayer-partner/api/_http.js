@@ -13,12 +13,27 @@ export function jsonResponse(body, status = 200) {
   });
 }
 
+// The deployment's own hostnames, injected by Vercel. Without these only the
+// production domain passes, so a preview deployment rejects requests from its
+// own pages and email can never be exercised before release. This admits the
+// deployment itself, not *.vercel.app at large.
+function selfOrigins() {
+  return [
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ]
+    .filter(Boolean)
+    .map((host) => `https://${String(host).trim()}`);
+}
+
 export function isAllowedOrigin(origin) {
   const configured = String(process.env.ALLOWED_ORIGINS || "")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
-  return Boolean(origin && new Set([...DEFAULT_ALLOWED_ORIGINS, ...configured]).has(origin));
+  const allowed = new Set([...DEFAULT_ALLOWED_ORIGINS, ...selfOrigins(), ...configured]);
+  return Boolean(origin && allowed.has(origin));
 }
 
 export async function readJsonBody(request, maxBytes = 12_000) {
