@@ -3,7 +3,7 @@ import { escapeHtml, isAllowedOrigin, jsonResponse, readJsonBody, validateSigned
 import { mailIsConfigured, sendMail } from "./_mail.js";
 import { createPrayerCardPdf } from "./_pdf.js";
 import { findPrayerStudent, pickupCodeForStudent, schoolAndGrade } from "./_students.js";
-import { verifyChallenge } from "./_verification.js";
+import { signingIsConfigured, verifyChallenge } from "./_verification.js";
 import { recordApplication } from "./_notion.js";
 
 const attemptsByToken = globalThis.__amicusCodeAttempts || new Map();
@@ -53,7 +53,7 @@ export default {
     }
 
     try {
-      if (!mailIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
+      if (!mailIsConfigured() || !signingIsConfigured()) {
         return jsonResponse({ error: "이메일 발송 설정이 아직 완료되지 않았습니다.", code: "email_not_configured" }, 503);
       }
 

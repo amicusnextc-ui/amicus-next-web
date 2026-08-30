@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { isAllowedOrigin, jsonResponse, readJsonBody, escapeHtml, validateVerificationRequest } from "./_http.js";
 import { mailIsConfigured, sendMail } from "./_mail.js";
 import { selectPrayerStudent } from "./_students.js";
-import { createVerificationChallenge } from "./_verification.js";
+import { createVerificationChallenge, signingIsConfigured } from "./_verification.js";
 import { listAssignedCounts } from "./_notion.js";
 
 const REQUEST_COOLDOWN_MS = 60_000;
@@ -38,7 +38,7 @@ export default {
       const body = await readJsonBody(request);
       const application = validateVerificationRequest(body);
       if (!application) return jsonResponse({ error: "신청 정보를 확인해 주세요.", code: "invalid_application" }, 400);
-      if (!mailIsConfigured() || String(process.env.EMAIL_SIGNING_SECRET || "").length < 32) {
+      if (!mailIsConfigured() || !signingIsConfigured()) {
         return jsonResponse({ error: "이메일 발송 설정이 아직 완료되지 않았습니다.", code: "email_not_configured" }, 503);
       }
 

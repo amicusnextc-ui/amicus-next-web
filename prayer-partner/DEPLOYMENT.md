@@ -36,7 +36,7 @@ environment variables), otherwise Mailtrap. With neither, the API returns
 | Variable | Required | Notes |
 |---|---|---|
 | `RESEND_API_KEY` | one of the two | Same key as the amicus-checkin project; sends from `noreply@amicuschurch.com` by default |
-| `EMAIL_SIGNING_SECRET` | yes | **32+ characters.** Signs the verification token. Generate with `openssl rand -hex 32` |
+| `EMAIL_SIGNING_SECRET` | no under Resend | Auto-derived from `RESEND_API_KEY` when unset (rotating that key only voids in-flight 10-minute codes). Required 32+ chars under Mailtrap; set explicitly to override |
 | `MAIL_FROM_EMAIL` | Mailtrap only | Optional under Resend (defaults to `noreply@amicuschurch.com`; must be on a domain Resend has verified) |
 | `MAIL_FROM_NAME` | no | Defaults to `AMICUS NEXT CHURCH` |
 | `MAIL_REPLY_TO` | no | Sets `reply_to` |
@@ -45,7 +45,7 @@ environment variables), otherwise Mailtrap. With neither, the API returns
 | `MAILTRAP_API_KEY` | one of the two | Fallback provider, used only when `RESEND_API_KEY` is absent |
 | `MAILTRAP_USE_SANDBOX` | no | `true` routes Mailtrap to its sandbox; requires `MAILTRAP_INBOX_ID` |
 | `MAILTRAP_INBOX_ID` | if sandbox | Required when `MAILTRAP_USE_SANDBOX=true` |
-| `NOTION_API_KEY` | for records | Internal-integration secret; see **Records in Notion** below |
+| `NOTION_TOKEN` | for records | Same value and name as the amicus-checkin project (`NOTION_API_KEY` also accepted); see **Records in Notion** below |
 | `NOTION_APPLICATIONS_DB` | no | Overrides the 신청 database id (default baked in) |
 | `NOTION_PRAYER_LOG_DB` | no | Overrides the 기도 기록 database id (default baked in) |
 
@@ -104,12 +104,15 @@ The same record drives behavior, not just reporting:
 
 ### Enabling it
 
-1. Create an **internal integration** at <https://www.notion.so/profile/integrations>
-   (workspace: the church workspace) and copy its secret.
-2. Open the **Prayer Partners 데이터** page → ⋯ menu → **Connections** →
-   connect the integration. Both databases inherit access from the page.
-3. Add the secret as `NOTION_API_KEY` in Vercel (Production **and** Preview)
-   and redeploy.
+The **Prayer Partners 데이터** page lives under **아미쿠스 교육부** — the same
+page the check-in app's Notion integration is connected to — so that
+integration's token reaches these databases too. Copy the `NOTION_TOKEN`
+value from the amicus-checkin project's environment variables into this
+project (Production **and** Preview) and redeploy. No new integration needed.
+
+If rows don't appear even with the token set, the check-in integration was
+granted per-database rather than on 아미쿠스 교육부: open **Prayer Partners
+데이터** → ⋯ → **Connections** → connect that integration once.
 
 ### When it is off or down
 

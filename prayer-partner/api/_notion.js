@@ -35,15 +35,21 @@ const DEPARTMENT_LABELS = {
   youth: "중고등부"
 };
 
+// NOTION_TOKEN is the name the amicus-checkin project already uses, so the
+// value can be copied between projects without renaming.
+function notionKey() {
+  return process.env.NOTION_API_KEY || process.env.NOTION_TOKEN || "";
+}
+
 export function notionIsConfigured() {
-  return Boolean(process.env.NOTION_API_KEY);
+  return Boolean(notionKey());
 }
 
 async function notionRequest(method, path, body, timeoutMs) {
   const response = await fetch(`https://api.notion.com/v1${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${process.env.NOTION_API_KEY}`,
+      Authorization: `Bearer ${notionKey()}`,
       "Notion-Version": NOTION_VERSION,
       "Content-Type": "application/json"
     },
