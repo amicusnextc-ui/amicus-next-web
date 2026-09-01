@@ -398,8 +398,23 @@ personDialog.addEventListener("click", (event) => {
   if (event.target === personDialog) personDialog.close();
 });
 
+// A partner arriving from the home page or a reminder email lands on their own
+// student, not on a grid of twenty-five. ?student=<id> opens that card straight
+// away; an unknown id just leaves the normal list showing.
+function openRequestedStudent() {
+  const requested = params.get("student");
+  if (!requested) return;
+  const student = department.students.find((person) => person.id === requested);
+  if (!student) return;
+  setRole("student");
+  openPerson(student);
+}
+
 applyDepartment();
-window.setTimeout(renderPeople, 320);
+window.setTimeout(() => {
+  renderPeople();
+  openRequestedStudent();
+}, 320);
 
 window.AMICUS_AVAILABILITY?.then((availability) => {
   if (availability && availability.students) {
