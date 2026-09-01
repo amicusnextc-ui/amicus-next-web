@@ -1,7 +1,7 @@
 import { escapeHtml, jsonResponse } from "./_http.js";
 import { mailIsConfigured, sendMail } from "./_mail.js";
 import { listParticipationDays, listPartnerApplications, notionIsConfigured } from "./_notion.js";
-import { findPrayerStudent, schoolAndGrade } from "./_students.js";
+import { findPrayerStudent, prayerText, schoolAndGrade } from "./_students.js";
 
 // The Sunday-evening nudge. One mail per verified partner: their student, the
 // prayer topic, the promise they made, and the weeks they have recorded so
@@ -122,7 +122,7 @@ function reminderHtml({ partnerName, department, student, rhythmLabel, record, h
           <div style="margin-top:28px;padding:24px;border-radius:14px;background:#f0e4cf;">
             <strong style="display:block;margin-bottom:8px;">${escapeHtml(department.name)}</strong>
             ${school ? `<span style="display:block;color:#6b6259;font-size:13px;">${escapeHtml(school)}</span>` : ""}
-            <p style="margin:18px 0 0;line-height:1.75;">${escapeHtml(student.prayer)}</p>
+            <p style="margin:18px 0 0;line-height:1.75;">${escapeHtml(prayerText(student))}</p>
           </div>
 
           <p style="margin:30px 0 10px;color:#6b6259;font-size:13px;">나의 기도 약속 · ${escapeHtml(rhythmLabel || "매주")}</p>
@@ -163,7 +163,7 @@ function reminderText({ partnerName, department, student, rhythmLabel, record, h
 부서: ${department.name}
 ${school ? `학교와 학년: ${school}\n` : ""}
 기도제목
-${student.prayer}
+${prayerText(student)}
 
 나의 기도 약속 · ${rhythmLabel || "매주"}
 ${chartText(record.bars)}
