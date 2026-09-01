@@ -232,3 +232,79 @@ export async function recordPrayerParticipation({ partnerName, applicationId, ke
     return { recorded: false, reason: "write_failed" };
   }
 }
+
+// --- Readers used by the weekly reminder ------------------------------------
+
+// Reverse of DEPARTMENT_LABELS: the applications DB stores the department as a
+// human label, but links and student lookups need the key back.
+const DEPARTMENT_KEYS = Object.fromEntries(
+  Object.entries(DEPARTMENT_LABELS).map(([key, label]) => [label, key])
+);
+
+// Every verified application, as the reminder needs it. Returns null on
+// failure so the caller can refuse to send rather than send to a short list.
+export async function listPartnerApplications(timeoutMs = 8_000) {
+  if (!notionIsConfigured()) return null;
+  try {
+    const rows = [];
+    let cursor;
+    for (let page = 0; page < 10; page += 1) {
+      const data = await notionRequest("POST", `/databases/${APPLICATIONS_DB}/query`, {
+        page_size: 100,
+        ...(cursor ? { start_cursor: cursor } : {})
+      }, timeoutMs);
+      for (const row of data.results || []) {
+        const properties = row.properties || {};
+        const email = properties["이메일"]?.email || "";
+        const studentId = plainText(properties["학생 ID"]);
+        const departmentKey = DEPARTMENT_KEYS[properties["매칭 부서"]?.select?.name || ""] || "";
+        if (!email || !studentId || !departmentKey) continue;
+        rows.push({
+          partnerName: plainText(properties["파트너 이름"]) || "기도 파트너",
+          email,
+          studentId,
+          departmentKey,
+          applicationId: plainText(properties["신청 ID"]),
+          rhythmLabel: properties["기도 약속"]?.select?.name || ""
+        });
+      }
+      if (!data.has_more) break;
+      cursor = data.next_cursor;
+    }
+    return rows;
+  } catch (error) {
+    console.error("Notion application list failed", { name: error?.name, status: error?.status });
+    return null;
+  }
+}
+
+// applicationId -> the YYYY-MM-DD days that partner reported, from the named
+// check-in log. Days are de-duplicated: two taps on one day are one day.
+export async function listParticipationDays({ since, timeoutMs = 8_000 }) {
+  if (!notionIsConfigured()) return null;
+  try {
+    const byApplication = {};
+    let cursor;
+    for (let page = 0; page < 20; page += 1) {
+      const data = await notionRequest("POST", `/databases/${PARTICIPATION_DB}/query`, {
+        page_size: 100,
+        ...(since ? { filter: { property: "날짜", date: { on_or_after: since } } } : {}),
+        ...(cursor ? { start_cursor: cursor } : {})
+      }, timeoutMs);
+      for (const row of data.results || []) {
+        const applicationId = plainText(row.properties?.["신청 ID"]);
+        const day = String(row.properties?.["날짜"]?.date?.start || "").slice(0, 10);
+        if (!applicationId || !day) continue;
+        (byApplication[applicationId] ||= new Set()).add(day);
+      }
+      if (!data.has_more) break;
+      cursor = data.next_cursor;
+    }
+    return Object.fromEntries(
+      Object.entries(byApplication).map(([id, days]) => [id, [...days].sort()])
+    );
+  } catch (error) {
+    console.error("Notion participation list failed", { name: error?.name, status: error?.status });
+    return null;
+  }
+}
