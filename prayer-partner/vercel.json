@@ -8,6 +8,15 @@
     "api/verify-send-prayer-card.js": {
       "maxDuration": 20,
       "includeFiles": "api/fonts/**"
+    },
+    "api/send-weekly-reminder.js": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/send-weekly-reminder",
+      "schedule": "0 2 * * *"
+    }
+  ]
 }
