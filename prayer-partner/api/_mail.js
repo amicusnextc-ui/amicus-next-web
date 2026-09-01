@@ -19,7 +19,7 @@ export async function sendMail(payload) {
 
 // The endpoints build Mailtrap-shaped payloads; translate for Resend here so
 // they don't need to know which provider is live.
-async function sendResend({ to, subject, text, html, attachments }) {
+async function sendResend({ to, subject, text, html, attachments, replyTo }) {
   const fromEmail = process.env.MAIL_FROM_EMAIL || RESEND_DEFAULT_FROM;
   const fromName = process.env.MAIL_FROM_NAME || "AMICUS NEXT CHURCH";
 
@@ -30,8 +30,11 @@ async function sendResend({ to, subject, text, html, attachments }) {
     text,
     html
   };
-  if (process.env.MAIL_REPLY_TO) {
-    message.reply_to = process.env.MAIL_REPLY_TO;
+  // A per-message reply address wins over the project default, so mail people
+  // are meant to answer never lands on the unread noreply@ box.
+  const reply = replyTo || process.env.MAIL_REPLY_TO;
+  if (reply) {
+    message.reply_to = reply;
   }
   if (attachments?.length) {
     message.attachments = attachments.map(({ filename, content }) => ({ filename, content }));
