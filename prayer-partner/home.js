@@ -101,8 +101,69 @@ function render() {
 
   // A partner returning mid-semester wants their student, not the form.
   const assignment = readAssignment();
-  document.querySelector("#myPrayerLink").hidden = !assignment;
+  const myLink = document.querySelector("#myPrayerLink");
+  myLink.hidden = !assignment;
+  if (assignment) myLink.href = myStudentHref(assignment);
   document.querySelector("#applyLink").classList.toggle("is-only-action", !assignment);
+  renderCommitment(assignment);
+}
+
+// Straight to their own student's card, where the prayer button lives — not to
+// the application page they have already finished.
+function myStudentHref(assignment) {
+  if (!assignment.departmentKey || !assignment.studentId) return "partner.html";
+  return `department.html?dept=${encodeURIComponent(assignment.departmentKey)}&student=${encodeURIComponent(assignment.studentId)}`;
+}
+
+const RHYTHM_LABEL = { daily: "매일", "three-times": "주 3회", weekly: "매주" };
+const RHYTHM_TARGET = { daily: 7, "three-times": 3, weekly: 1 };
+
+// The dates this device recorded for one person, from the same store the
+// department page writes to.
+function prayedDatesFor(assignment) {
+  try {
+    const log = JSON.parse(localStorage.getItem("amicus-prayer-log-v1") || "{}");
+    const key = `${assignment.departmentKey}:student:${assignment.studentId}`;
+    const dates = log && log[key];
+    return Array.isArray(dates) ? dates : [];
+  } catch {
+    return [];
+  }
+}
+
+// Sunday-to-Saturday week the semester is currently in.
+function thisWeekCount(dates) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay());
+  return dates.filter((date) => new Date(`${date}T00:00:00`) >= start).length;
+}
+
+// Their own promise, and how this week is going against it. Everything here is
+// on-device: nothing about a partner's rhythm is sent anywhere to draw it.
+function renderCommitment(assignment) {
+  const panel = document.querySelector("#commitmentPanel");
+  if (!panel) return;
+  if (!assignment || !assignment.prayerRhythm) {
+    panel.hidden = true;
+    return;
+  }
+  const label = RHYTHM_LABEL[assignment.prayerRhythm];
+  const target = RHYTHM_TARGET[assignment.prayerRhythm];
+  if (!label || !target) {
+    panel.hidden = true;
+    return;
+  }
+  const done = thisWeekCount(prayedDatesFor(assignment));
+  const met = done >= target;
+  panel.hidden = false;
+  panel.querySelector("#commitmentRhythm").textContent = label;
+  panel.querySelector("#commitmentProgress").textContent = met
+    ? `이번 주 ${done}회 — 약속을 지키셨어요.`
+    : `이번 주 ${done}회 기록하셨어요.`;
+  const cta = panel.querySelector("#commitmentCta");
+  cta.href = myStudentHref(assignment);
+  cta.textContent = met ? "한 번 더 기도하기 →" : "오늘 기도 기록하기 →";
 }
 
 render();
