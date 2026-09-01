@@ -48,6 +48,8 @@ environment variables), otherwise Mailtrap. With neither, the API returns
 | `NOTION_TOKEN` | for records | Same value and name as the amicus-checkin project (`NOTION_API_KEY` also accepted); see **Records in Notion** below |
 | `NOTION_APPLICATIONS_DB` | no | Overrides the 신청 database id (default baked in) |
 | `NOTION_PRAYER_LOG_DB` | no | Overrides the 기도 기록 database id (default baked in) |
+| `NOTION_PRAYER_PARTICIPATION_DB` | no | Overrides the 기도 참여 기록 database id (default baked in) |
+| `CRON_SECRET` | for reminders | 32+ random chars. Vercel sends it as `Authorization: Bearer …` on cron requests; `api/send-weekly-reminder.js` refuses every request without it, so without this set the weekly reminder never sends |
 
 ## Origins
 
@@ -121,3 +123,27 @@ keep working; `/api/availability` returns 503 and the pages quietly fall back
 to per-browser numbers; prayer counts stay device-only and the dialog's
 wording says so. The Notion write itself is best-effort — an outage costs the
 row, never the applicant's prayer card.
+
+## Weekly reminder
+
+`api/send-weekly-reminder.js` mails every verified partner their student, the
+prayer topic, and a bar chart of the weeks they have recorded so far. It reads
+Notion and sends; it writes nothing, and a failed Notion read abandons the run
+rather than mailing a partial list.
+
+Hobby crons fire at most once a day, so `vercel.json` schedules it daily at
+`0 2 * * *` (UTC) and the function itself only sends when it is **Sunday
+18:00 or later in America/Los_Angeles** — which that UTC hour is, in both PDT
+and PST. Every other firing returns `{ skipped: true }`.
+
+Query parameters, all requiring the `CRON_SECRET` bearer token:
+
+| Parameter | Effect |
+|---|---|
+| `?dry=1` | Renders every mail, sends none. Use to check the recipient count |
+| `?test=<email>` | Renders the **first** real assignment and delivers that one mail to `<email>` only, subject prefixed `[테스트]` |
+| `?force=1` | Sends for real outside the Sunday window |
+| `?offset=N` | Resumes at recipient N. The run stops itself at 48s and reports `nextOffset` rather than being killed at the 60s Hobby limit |
+
+Reply-to is pinned to `amicusnextc@gmail.com` in the endpoint, so opt-out
+replies reach a person even though the mail is from `noreply@`.
