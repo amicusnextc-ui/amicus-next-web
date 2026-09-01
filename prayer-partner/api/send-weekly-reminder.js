@@ -15,7 +15,8 @@ const SITE = "https://amicus-prayer-partner.vercel.app";
 const SEMESTER_START = "2026-08-30"; // Sunday of week 1
 const REPLY_TO = "amicusnextc@gmail.com";
 const DAY_MS = 86_400_000;
-const CHART_WEEKS = 8;
+const CHART_WINDOW = 6;   // weeks of bars in the mail
+const SEMESTER_WEEKS = 16;
 const SEND_HOUR_PT = 18;
 
 const RHYTHM_TARGET = { "매일": 7, "주 3회": 3, "매주": 1 };
@@ -41,16 +42,26 @@ function weekIndex(day) {
   return Math.floor(diff / (7 * DAY_MS));
 }
 
-// Weekly counts from week 1 up to the week we are in now, capped so a long
-// semester still renders as a readable chart.
-function weeklyBuckets(days, currentWeek) {
-  const total = Math.min(Math.max(currentWeek + 1, 1), CHART_WEEKS);
-  const buckets = new Array(total).fill(0);
+// The last CHART_WINDOW weeks, ending at the week we are in now — a rolling
+// window, not the first six weeks of term. Over a 16-week semester the bottom
+// bar stays "this week" instead of freezing at week 6, and the whole-semester
+// figures below the chart carry the weeks that scrolled off the top.
+function weeklyWindow(days, currentWeek) {
+  const counts = new Map();
+  const weeksRecorded = new Set();
+  let total = 0;
   for (const day of days) {
     const index = weekIndex(day);
-    if (index >= 0 && index < total) buckets[index] += 1;
+    if (index < 0 || index > currentWeek) continue;
+    total += 1;
+    weeksRecorded.add(index);
+    counts.set(index, (counts.get(index) || 0) + 1);
   }
-  return buckets;
+  const bars = [];
+  for (let week = Math.max(0, currentWeek - CHART_WINDOW + 1); week <= currentWeek; week += 1) {
+    bars.push({ label: `${week + 1}주차`, count: counts.get(week) || 0 });
+  }
+  return { bars, total, weeksRecorded: weeksRecorded.size, semesterWeek: currentWeek + 1 };
 }
 
 function studentHref(departmentKey, studentId) {
@@ -59,16 +70,16 @@ function studentHref(departmentKey, studentId) {
 
 // Horizontal bars as plain table rows: no images, no scripts, nothing an email
 // client has to be talked into rendering.
-function chartHtml(buckets, target) {
-  const scale = Math.max(target, ...buckets, 1);
-  const rows = buckets.map((count, index) => {
+function chartHtml(bars, target) {
+  const scale = Math.max(target, ...bars.map((bar) => bar.count), 1);
+  const rows = bars.map(({ label, count }, index) => {
     const width = Math.round((count / scale) * 100);
-    const isNow = index === buckets.length - 1;
+    const isNow = index === bars.length - 1;
     const bar = count === 0
       ? `<span style="display:inline-block;height:10px;width:100%;border-radius:5px;background:#eae1cf;"></span>`
       : `<span style="display:inline-block;height:10px;width:${Math.max(width, 6)}%;border-radius:5px;background:${isNow ? "#b55d28" : "#c9b48c"};"></span>`;
     return `<tr>
-      <td style="padding:5px 10px 5px 0;font-size:12px;color:#6b6259;white-space:nowrap;">${index + 1}주차</td>
+      <td style="padding:5px 10px 5px 0;font-size:12px;color:#6b6259;white-space:nowrap;">${label}</td>
       <td style="padding:5px 10px 5px 0;width:100%;">${bar}</td>
       <td style="padding:5px 0;font-size:12px;color:${isNow ? "#b55d28" : "#6b6259"};white-space:nowrap;font-weight:${isNow ? "bold" : "normal"};">${count}회</td>
     </tr>`;
@@ -76,16 +87,23 @@ function chartHtml(buckets, target) {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${rows}</table>`;
 }
 
-function chartText(buckets) {
-  return buckets
-    .map((count, index) => `${index + 1}주차 ${"■".repeat(Math.min(count, 10)) || "·"} ${count}회`)
+function chartText(bars) {
+  return bars
+    .map(({ label, count }) => `${label} ${"■".repeat(Math.min(count, 10)) || "·"} ${count}회`)
     .join("\n");
 }
 
-function reminderHtml({ partnerName, department, student, rhythmLabel, buckets, href }) {
-  const thisWeek = buckets[buckets.length - 1] || 0;
+// Only worth saying once the chart has stopped showing the whole semester.
+function semesterSummary({ bars, total, weeksRecorded, semesterWeek }) {
+  if (semesterWeek <= bars.length) return "";
+  return `학기 ${semesterWeek}주 중 ${weeksRecorded}주 기록 · 총 ${total}회`;
+}
+
+function reminderHtml({ partnerName, department, student, rhythmLabel, record, href }) {
+  const thisWeek = record.bars[record.bars.length - 1]?.count || 0;
   const target = RHYTHM_TARGET[rhythmLabel] || 0;
-  const total = buckets.reduce((sum, count) => sum + count, 0);
+  const total = record.total;
+  const summary = semesterSummary(record);
   const school = schoolAndGrade(student);
   const status = total === 0
     ? "아직 이번 학기 기록이 없습니다. 오늘 첫 기록을 남겨 보세요."
@@ -108,8 +126,9 @@ function reminderHtml({ partnerName, department, student, rhythmLabel, buckets, 
           </div>
 
           <p style="margin:30px 0 10px;color:#6b6259;font-size:13px;">나의 기도 약속 · ${escapeHtml(rhythmLabel || "매주")}</p>
-          ${chartHtml(buckets, target)}
-          <p style="margin:14px 0 0;font-size:13px;line-height:1.7;">${status}</p>
+          ${chartHtml(record.bars, target)}
+          ${summary ? `<p style="margin:12px 0 0;color:#6b6259;font-size:12px;">${summary}</p>` : ""}
+          <p style="margin:${summary ? 6 : 14}px 0 0;font-size:13px;line-height:1.7;">${status}</p>
 
           <p style="margin:30px 0 0;">
             <a href="${href}" style="display:inline-block;padding:14px 26px;border-radius:999px;background:#b55d28;color:#fffdf8;font-weight:bold;text-decoration:none;font-size:15px;">오늘 기도 기록하기 →</a>
@@ -136,8 +155,9 @@ function reminderHtml({ partnerName, department, student, rhythmLabel, buckets, 
   </html>`;
 }
 
-function reminderText({ partnerName, department, student, rhythmLabel, buckets, href }) {
+function reminderText({ partnerName, department, student, rhythmLabel, record, href }) {
   const school = schoolAndGrade(student, " | ");
+  const summary = semesterSummary(record);
   return `${partnerName}님, 오늘 ${student.name} 학생을 위해 기도해 주세요.
 
 부서: ${department.name}
@@ -146,8 +166,8 @@ ${school ? `학교와 학년: ${school}\n` : ""}
 ${student.prayer}
 
 나의 기도 약속 · ${rhythmLabel || "매주"}
-${chartText(buckets)}
-
+${chartText(record.bars)}
+${summary ? `${summary}\n` : ""}
 오늘 기도 기록하기
 ${href}
 
@@ -201,7 +221,13 @@ export default {
     const participation = await listParticipationDays({ since: SEMESTER_START });
     if (!participation) return jsonResponse({ error: "notion_read_failed" }, 502);
 
-    const currentWeek = Math.max(weekIndex(now.day), 0);
+    // Clamped to the semester: after week 16 the reminder has nothing new to
+    // report, so it stops rather than counting into the next term.
+    const rawWeek = weekIndex(now.day);
+    if (!force && rawWeek >= SEMESTER_WEEKS) {
+      return jsonResponse({ skipped: true, reason: "semester_over", pacific: now, week: rawWeek + 1 });
+    }
+    const currentWeek = Math.min(Math.max(rawWeek, 0), SEMESTER_WEEKS - 1);
 
     // In test mode one real assignment is rendered in full but delivered only
     // to the address given, so a leader sees exactly what members will get.
@@ -226,7 +252,7 @@ export default {
         department: match.department,
         student: match.student,
         rhythmLabel: application.rhythmLabel,
-        buckets: weeklyBuckets(days, currentWeek),
+        record: weeklyWindow(days, currentWeek),
         href: studentHref(application.departmentKey, application.studentId)
       };
 
