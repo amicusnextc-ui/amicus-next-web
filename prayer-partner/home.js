@@ -115,6 +115,12 @@ function myStudentHref(assignment) {
   return `department.html?dept=${encodeURIComponent(assignment.departmentKey)}&student=${encodeURIComponent(assignment.studentId)}`;
 }
 
+// The 10-minute guide, already filled in with this partner's student.
+function guideHref(assignment) {
+  if (!assignment.departmentKey || !assignment.studentId) return "guide.html";
+  return `guide.html?dept=${encodeURIComponent(assignment.departmentKey)}&student=${encodeURIComponent(assignment.studentId)}`;
+}
+
 const RHYTHM_LABEL = { daily: "매일", "three-times": "주 3회", weekly: "매주" };
 const RHYTHM_TARGET = { daily: 7, "three-times": 3, weekly: 1 };
 
@@ -163,6 +169,8 @@ function renderCommitment(assignment) {
     : `이번 주 ${done}회 기록하셨어요.`;
   const cta = panel.querySelector("#commitmentCta");
   cta.href = myStudentHref(assignment);
+  const guide = panel.querySelector("#commitmentGuide");
+  if (guide) guide.href = guideHref(assignment);
   cta.textContent = met ? "한 번 더 기도하기 →" : "오늘 기도 기록하기 →";
 }
 
