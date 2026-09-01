@@ -332,6 +332,60 @@ function renderReminderCopy() {
     : "기도 기록은 이 기기에만 저장됩니다. 화면 캡처와 외부 공유는 하지 말아 주세요.";
 }
 
+// A tap on the prayer button should feel like something happened. The toast is
+// a child of the dialog because a modal's backdrop would otherwise cover it,
+// and it is fixed-position so it floats rather than shifting the card.
+let toastTimer;
+
+function showPrayerToast(heading, detail) {
+  let toast = document.querySelector("#prayerToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "prayerToast";
+    toast.setAttribute("role", "status");
+    toast.style.cssText = [
+      "position:fixed", "left:50%", "bottom:26px",
+      "transform:translateX(-50%) translateY(8px)",
+      "max-width:min(340px,86vw)", "padding:14px 20px", "border-radius:14px",
+      "background:#2b2118", "color:#fffdf8", "text-align:center",
+      "box-shadow:0 12px 30px rgba(43,33,24,.28)", "pointer-events:none",
+      "opacity:0", "z-index:20"
+    ].join(";");
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      toast.style.transition = "opacity .22s ease, transform .22s ease";
+    }
+    personDialog.append(toast);
+  }
+
+  toast.replaceChildren();
+  const title = document.createElement("strong");
+  title.style.cssText = "display:block;font-size:14px;font-weight:800;";
+  title.textContent = heading;
+  toast.append(title);
+  if (detail) {
+    const line = document.createElement("span");
+    line.style.cssText = "display:block;margin-top:6px;font-size:13px;line-height:1.6;opacity:.82;";
+    line.textContent = detail;
+    toast.append(line);
+  }
+
+  window.requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+  });
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(8px)";
+  }, 3400);
+}
+
+function hidePrayerToast() {
+  window.clearTimeout(toastTimer);
+  const toast = document.querySelector("#prayerToast");
+  if (toast) toast.style.opacity = "0";
+}
+
 function togglePrayedToday() {
   if (!openPersonId) return;
   const log = readPrayerLog();
@@ -344,6 +398,18 @@ function togglePrayedToday() {
   writePrayerLog(log);
   renderPrayerRecord();
   reportPrayer(openPersonId, prayedNow);
+
+  if (!prayedNow) {
+    showPrayerToast("오늘 기록을 취소했습니다");
+    return;
+  }
+  const name = document.querySelector("#dialogName").textContent.trim();
+  const honorific = currentRole === "student" ? "학생" : "간사님";
+  const thisWeek = weeklyCounts(log[openPersonId]).buckets[3] || 0;
+  showPrayerToast(
+    "기도를 기록했습니다",
+    `${name} ${honorific}을 위한 이번 주 ${thisWeek}번째 기도입니다.`
+  );
 }
 
 function openPerson(person) {
@@ -363,6 +429,7 @@ function openPerson(person) {
   notePanel.hidden = !note;
   document.querySelector("#dialogNoteText").textContent = note;
 
+  hidePrayerToast();
   renderPrayerRecord();
   personDialog.showModal();
 }
@@ -392,6 +459,7 @@ document.querySelector("#dialogClose").addEventListener("click", () => personDia
 document.querySelector("#dialogPray").addEventListener("click", togglePrayedToday);
 personDialog.addEventListener("close", () => {
   openPersonId = null;
+  hidePrayerToast();
   scheduleRender();
 });
 personDialog.addEventListener("click", (event) => {
