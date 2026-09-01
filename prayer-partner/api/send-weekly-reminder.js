@@ -68,6 +68,13 @@ function studentHref(departmentKey, studentId) {
   return `${SITE}/department.html?dept=${encodeURIComponent(departmentKey)}&student=${encodeURIComponent(studentId)}`;
 }
 
+// The 10-minute guide, already filled in with this partner's student. The
+// reminder tells them to pray; this is where they go when they sit down and
+// find they have run out of words by the third week.
+function guideHref(departmentKey, studentId) {
+  return `${SITE}/guide.html?dept=${encodeURIComponent(departmentKey)}&student=${encodeURIComponent(studentId)}`;
+}
+
 // Horizontal bars as plain table rows: no images, no scripts, nothing an email
 // client has to be talked into rendering.
 function chartHtml(bars, target) {
@@ -99,7 +106,7 @@ function semesterSummary({ bars, total, weeksRecorded, semesterWeek }) {
   return `학기 ${semesterWeek}주 중 ${weeksRecorded}주 기록 · 총 ${total}회`;
 }
 
-function reminderHtml({ partnerName, department, student, rhythmLabel, record, href }) {
+function reminderHtml({ partnerName, department, student, rhythmLabel, record, href, guide }) {
   const thisWeek = record.bars[record.bars.length - 1]?.count || 0;
   const target = RHYTHM_TARGET[rhythmLabel] || 0;
   const total = record.total;
@@ -133,6 +140,9 @@ function reminderHtml({ partnerName, department, student, rhythmLabel, record, h
           <p style="margin:30px 0 0;">
             <a href="${href}" style="display:inline-block;padding:14px 26px;border-radius:999px;background:#b55d28;color:#fffdf8;font-weight:bold;text-decoration:none;font-size:15px;">오늘 기도 기록하기 →</a>
           </p>
+          <p style="margin:14px 0 0;font-size:13.5px;">
+            <a href="${guide}" style="color:#6b6259;">오늘 10분, 이렇게 기도해 보세요 →</a>
+          </p>
 
           <div style="margin-top:30px;padding-top:22px;border-top:1px solid #eae1cf;">
             <strong style="display:block;font-size:13px;margin-bottom:10px;">기록하는 방법</strong>
@@ -155,7 +165,7 @@ function reminderHtml({ partnerName, department, student, rhythmLabel, record, h
   </html>`;
 }
 
-function reminderText({ partnerName, department, student, rhythmLabel, record, href }) {
+function reminderText({ partnerName, department, student, rhythmLabel, record, href, guide }) {
   const school = schoolAndGrade(student, " | ");
   const summary = semesterSummary(record);
   return `${partnerName}님, 오늘 ${student.name} 학생을 위해 기도해 주세요.
@@ -170,6 +180,9 @@ ${chartText(record.bars)}
 ${summary ? `${summary}\n` : ""}
 오늘 기도 기록하기
 ${href}
+
+오늘 10분, 이렇게 기도해 보세요
+${guide}
 
 기록하는 방법
 1. 위 주소를 열면 ${student.name} 학생의 카드가 바로 열립니다.
@@ -253,7 +266,8 @@ export default {
         student: match.student,
         rhythmLabel: application.rhythmLabel,
         record: weeklyWindow(days, currentWeek),
-        href: studentHref(application.departmentKey, application.studentId)
+        href: studentHref(application.departmentKey, application.studentId),
+        guide: guideHref(application.departmentKey, application.studentId)
       };
 
       if (dryRun) { results.skipped += 1; continue; }
