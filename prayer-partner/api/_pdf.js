@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, rgb } from "pdf-lib";
-import { schoolAndGrade } from "./_students.js";
+import { prayerText, schoolAndGrade } from "./_students.js";
 
 function hexColor(value) {
   const hex = value.replace("#", "");
@@ -115,7 +115,7 @@ export async function createPrayerCardPdf({ partnerName, department, student, pi
 
   page.drawText("기도 제목", { x: 32, y: 274, size: 14, font, color: olive });
   page.drawLine({ start: { x: 32, y: 262 }, end: { x: 224, y: 262 }, thickness: 0.7, color: rule });
-  drawWrappedText(page, student.prayer, {
+  drawWrappedText(page, prayerText(student), {
     x: 32,
     y: 244,
     size: 10.5,
