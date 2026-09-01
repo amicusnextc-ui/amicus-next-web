@@ -437,6 +437,12 @@ function openPerson(person) {
   notePanel.hidden = !note;
   document.querySelector("#dialogNoteText").textContent = note;
 
+  const guideLink = document.querySelector("#dialogGuide");
+  if (guideLink) {
+    guideLink.hidden = currentRole !== "student";
+    guideLink.href = `guide.html?dept=${encodeURIComponent(departmentKey)}&student=${encodeURIComponent(person.id)}`;
+  }
+
   hidePrayerToast();
   renderPrayerRecord();
   personDialog.showModal();
