@@ -499,7 +499,7 @@ function renderResult(application, announce = false) {
   document.querySelector("#resultSchoolGrade").textContent = schoolLine;
   document.querySelector("#resultSchoolField").hidden = !schoolLine;
   document.querySelector("#resultPrayer").textContent =
-    realValue(student.prayer) || "이번 학기 기도제목이 아직 등록되지 않았습니다. 이름을 불러 기도해 주세요.";
+    realValue(student.prayer) || "이번 학기 기도제목은 곧 등록될 예정입니다. 그때까지 이름을 불러 기도해 주세요.";
   document.querySelector("#resultPickupCode").textContent = pickupCode;
   renderEmailDelivery(application);
 
