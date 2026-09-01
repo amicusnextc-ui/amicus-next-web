@@ -173,7 +173,7 @@ function cardMarkup(person, index, counts) {
       <span class="person-meta">${escapeHtml(meta)}</span>
       <span class="prayer-preview">
         <span>기도제목</span>
-        <p${prayer ? "" : ' class="is-empty"'}>${prayer ? escapeHtml(prayer) : "이번 학기 기도제목이 아직 등록되지 않았습니다."}</p>
+        <p${prayer ? "" : ' class="is-empty"'}>${prayer ? escapeHtml(prayer) : "이번 학기 기도제목은 곧 등록될 예정입니다."}</p>
       </span>
       <span class="card-foot">
         <span class="person-badge${badge.waiting ? " is-waiting" : ""}">${badge.text}</span>
@@ -431,7 +431,7 @@ function openPerson(person) {
   document.querySelector("#dialogRole").textContent = `${department.name} · ${roleLabel}`;
   document.querySelector("#dialogName").textContent = koreanName(person.name);
   document.querySelector("#dialogMeta").textContent = [latinName(person.name), meta].filter(Boolean).join(" · ");
-  document.querySelector("#dialogPrayer").textContent = prayer || "이번 학기 기도제목이 아직 등록되지 않았습니다. 이름을 불러 기도해 주세요.";
+  document.querySelector("#dialogPrayer").textContent = prayer || "이번 학기 기도제목은 곧 등록될 예정입니다. 그때까지 이름을 불러 기도해 주세요.";
 
   const notePanel = document.querySelector("#dialogNote");
   notePanel.hidden = !note;
