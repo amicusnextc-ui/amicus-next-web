@@ -8,6 +8,15 @@ export function realValue(value) {
   return text;
 }
 
+// The 기도제목 a reader should see. Students whose topic has not been collected
+// yet carry placeholder prose in data.js ("없음"); printing that on a prayer
+// card reads as "there is nothing to pray about". Say what is actually true
+// instead, and still ask for the student by name.
+export function prayerText(student) {
+  return realValue(student.prayer) ||
+    "이번 학기 기도제목은 곧 등록될 예정입니다. 그때까지 이름을 불러 기도해 주세요.";
+}
+
 // "학교 / 학년" with whichever halves actually exist; empty when neither does.
 export function schoolAndGrade(student, separator = " / ") {
   return [realValue(student.school), realValue(student.grade)].filter(Boolean).join(separator);
