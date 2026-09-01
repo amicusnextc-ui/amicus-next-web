@@ -4329,3 +4329,22 @@ button:active,
   }
 
 }
+
+/* A way out of "I don't know what to say" placed where that thought happens:
+   inside the student's card, immediately above the button that records. */
+.dialog-guide-link {
+  display: block;
+  margin-top: 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.dialog-guide-link:hover,
+.dialog-guide-link:focus-visible {
+  color: var(--rust);
+}
