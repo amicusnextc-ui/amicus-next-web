@@ -55,8 +55,8 @@ export const prayerDepartments = {
       { id: "elementary-jr-raon", name: "박라온 (Laon Park)", school: "학교 정보 없음", grade: "2학년", prayer: "2학년에서 좋은 선생님과 친구들을 만나고, 부모님이 건강하도록 기도해 주세요." },
       { id: "elementary-jr-hael", name: "조하엘 (Janice Cho)", school: "학교 정보 없음", grade: "1학년", prayer: "좋은 친구들을 만나 함께 즐겁게 지내도록 기도해 주세요." },
       { id: "elementary-jr-ain", name: "김아인", school: "학교 정보 없음", grade: "학년 정보 없음", prayer: "항상 감사할 수 있고, 좋은 친구를 많이 사귀며 자신을 더 사랑할 수 있도록 기도해 주세요." },
-      { id: "elementary-jr-sua", name: "박수아 (Chloe Suah Park)", school: "학교 정보 없음", grade: "Kindergarten", prayer: "없음" },
-      { id: "elementary-jr-sophia", name: "이소피아", school: "학교 정보 없음", grade: "학년 정보 없음", prayer: "없음" }
+      { id: "elementary-jr-sua", name: "박수아 (Chloe Suah Park)", school: "학교 정보 없음", grade: "Kindergarten", prayer: "새 학기가 시작되면서 수아가 새 친구들을 사귀고 어울리는 것에 대한 고민이 많은 것 같습니다. 수아가 학교 생활을 즐겁게 하고 친구들과 잘 어울려 지내며, 항상 건강하게 지낼 수 있도록 하나님께서 인도해 주시기를 기도 부탁드립니다." },
+      { id: "elementary-jr-sophia", name: "이소피아", school: "학교 정보 없음", grade: "1학년", prayer: "1학년 새로운 학교생활에 잘 적응하고, 좋은 친구들을 사귀어 즐겁게 학교에 다닐 수 있도록 기도해 주세요." }
     ]
   },
   elementary: {
