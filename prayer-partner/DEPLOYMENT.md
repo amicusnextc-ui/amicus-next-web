@@ -64,12 +64,14 @@ verified before release.
 
 ## Functions
 
-`vercel.json` in this directory declares the two routes. `includeFiles` on the
-PDF route bundles the Korean font, without which the generated prayer card
-renders CJK as blank boxes.
+`vercel.json` in this directory declares the routes. `includeFiles` on every
+route that builds a PDF bundles the Korean font, without which the generated
+prayer card renders CJK as blank boxes.
 
 - `api/request-email-verification.js` — 10s
 - `api/verify-send-prayer-card.js` — 20s, bundles `api/fonts/**`
+- `api/send-weekly-reminder.js` — 60s
+- `api/resend-prayer-card.js` — 30s, bundles `api/fonts/**`
 
 ## Checking a deployment
 
@@ -147,3 +149,34 @@ Query parameters, all requiring the `CRON_SECRET` bearer token:
 
 Reply-to is pinned to `amicusnextc@gmail.com` in the endpoint, so opt-out
 replies reach a person even though the mail is from `noreply@`.
+
+## Resending a card when the prayer topic arrives late
+
+Most topics reach the church weeks after the partner was matched, so the card
+they already have says only "기도제목은 곧 등록될 예정입니다" and nothing ever
+corrects it. `api/verify-send-prayer-card.js` cannot fix that — it is gated on
+a 6-digit code the partner types on their own device, which a leader has no way
+to produce.
+
+`api/resend-prayer-card.js` is the leader's side of it. Update the student's
+`prayer` in **both** `data.js` and `api/_students.js`, deploy, then:
+
+```
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  "https://amicus-prayer-partner.vercel.app/api/resend-prayer-card?student=<studentId>&dry=1"
+```
+
+`studentId` is the roster id, e.g. `youth-sunwoo`. The endpoint looks the
+student up in the Notion application record, so it needs no email address:
+whoever is praying for that student is who it mails.
+
+| Parameter | Effect |
+|---|---|
+| `?student=<id>` | Required. The roster id, e.g. `elementary-jr-sophia` |
+| `?dry=1` | Renders the mail and returns it, sends nothing. Always run this first |
+| `?test=<email>` | Delivers the real mail to `<email>` instead of the partner |
+
+Drop `dry=1` to send. It writes nothing to Notion — the application row already
+exists, and a resend must not create a second one. Subject and body are neutral
+about whether this is the topic's first arrival or a revision, because one
+endpoint serves both and the partner cannot tell the difference anyway.
