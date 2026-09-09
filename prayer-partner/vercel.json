@@ -11,6 +11,10 @@
     },
     "api/send-weekly-reminder.js": {
       "maxDuration": 60
+    },
+    "api/resend-prayer-card.js": {
+      "maxDuration": 30,
+      "includeFiles": "api/fonts/**"
     }
   },
   "crons": [
