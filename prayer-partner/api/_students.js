@@ -78,7 +78,7 @@ export const prayerDepartments = {
     accentSoft: "#c9dcda",
     students: [
       { id: "youth-hanseong", name: "고한성 (David Ko)", school: "Olympian High School", grade: "10학년", prayer: "중고등부 공동체가 안전하고 기쁨이 넘치며, 자신도 모든 상황에서 하나님을 신뢰하도록 기도해 주세요." },
-      { id: "youth-sunwoo", name: "권순우 (Snuh Kwon)", school: "Scripps Ranch High School", grade: "11학년", prayer: "없음" },
+      { id: "youth-sunwoo", name: "권순우 (Snuh Kwon)", school: "Scripps Ranch High School", grade: "11학년", prayer: "좋은 성적을 받을 수 있도록, 5월에 있을 시험들을 잘 볼 수 있도록, 배드민턴을 잘할 수 있도록, 그리고 학교생활을 잘할 수 있도록 기도해 주세요." },
       { id: "youth-yubin", name: "김유빈 (Katie Kim)", school: "Rancho Bernardo High School", grade: "11학년", prayer: "가족이 건강하고 자신의 꿈을 이루며, 무엇보다 사랑이 풍성한 사람이 되도록 기도해 주세요." },
       { id: "youth-yuan", name: "김유안", school: "학교 정보 확인 필요", grade: "6학년", prayer: "하나님께서 늘 함께하심을 믿고 영적 싸움 속에서도 주님을 예배하며, 받은 지혜로 하나님께 영광 돌리도록 기도해 주세요." },
       { id: "youth-jian", name: "김지안", school: "Bernardo Heights Middle School", grade: "학년 정보 없음", prayer: "학교 성적이 학기 끝까지 잘 나오도록 기도해 주세요." },
