@@ -95,7 +95,7 @@ export const prayerDepartments = {
       { id: "youth-hena", name: "이혜나 (Hena Yi)", school: "학교 정보 없음", grade: "6학년", prayer: "가족이 언제나 행복하고, 혜나와 인요가 어떤 상황에서도 건강하고 행복하도록 기도해 주세요." },
       { id: "youth-yeowon", name: "조여원 (Noel Cho)", school: "Mesa Verde Middle School", grade: "8학년", prayer: "하나님을 찾는 일에 게으르지 않고 학교생활에 성실하며, 걱정을 내려놓고 동기를 얻어 미루는 습관을 이기도록 기도해 주세요." },
       { id: "youth-jia", name: "최지아 (Estella Choi)", school: "학교 정보 확인 필요", grade: "6학년", prayer: "가족이 행복하고 할머니가 잘 회복하시며, 오랫동안 마음에 품어 온 어려움에서도 지아의 마음이 회복되도록 기도해 주세요." },
-      { id: "youth-inha", name: "황인하 (Saige Hwang)", school: "Bernardo Heights Middle School", grade: "8학년", prayer: "없음" },
+      { id: "youth-inha", name: "황인하 (Saige Hwang)", school: "Bernardo Heights Middle School", grade: "8학년", prayer: "좋은 성적(GPA)을 받을 수 있도록, 올 한 해 학교생활을 잘할 수 있도록, 그리고 지역사회 봉사 활동에 더 많이 참여할 수 있도록 기도해 주세요." },
       { id: "youth-dustin-shin", name: "신더스틴 (Dustin Shin)", school: "학교 정보 없음", grade: "7학년", prayer: "없음" },
       { id: "youth-joseph-senethep", name: "조셉 (Joseph Senethep)", school: "Bernardo Heights Middle School", grade: "8학년", prayer: "올해 해야 할 모든 일을 잘 감당하고 끝까지 따라갈 수 있도록 기도해 주세요." },
       { id: "youth-justin-kim", name: "저스틴 (Justin Kim)", school: "Olympian High School", grade: "10학년", prayer: "없음" },
